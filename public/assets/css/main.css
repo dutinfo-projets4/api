@@ -6,7 +6,7 @@ body {
 .navbar {
 	background-color: #0c1530;
 	border: 2px solid #2c375a;
-	border-top: 0;
+	border-top: none;
 }
 
 .navbar a {

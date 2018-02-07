@@ -1,40 +1,42 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-		<title>{% block title %}{% endblock %}</title>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>{% block title %}{% endblock %}</title>
 
-		<link rel="stylesheet" href="assets/css/bootstrap.min.css" />
-		<link rel="stylesheet" href="assets/css/main.css" />
+	<link rel="stylesheet" href="assets/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="assets/css/main.css"/>
 
-		{% block stylesheets %}{% endblock %}
-	</head>
-	<body>
-		<div class="container">
+	{% block stylesheets %}{% endblock %}
+</head>
+<body>
 
-			<nav class="navbar fixed-top navbar-expand-lg navbar-light">
-				<a class="navbar-brand d-md-none d-sm-block" href="#">Alohomora</a>
-				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle">
-					<span class="navbar-toggler-icon"></span>
-				</button>
+<nav class="navbar sticky-top navbar-expand-lg navbar-light">
+	<a class="navbar-brand d-md-none d-sm-block" href="#">Alohomora</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+			aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle">
+		<span class="navbar-toggler-icon"></span>
+	</button>
 
-				<div class="collapse navbar-collapse" id="navbarNav">
-					<ul class="navbar-nav mx-auto text-center">
-						<li class="nav-item active">
-							<a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="#">About</a>
-						</li>
-					</ul>
-				</div>
-			</nav>
-			{% block content %}{% endblock %}
-		</div>
+	<div class="collapse navbar-collapse" id="navbarNav">
+		<ul class="navbar-nav mx-auto text-center">
+			<li class="nav-item active">
+				<a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#">About</a>
+			</li>
+		</ul>
+	</div>
+</nav>
+<div class="container">
 
-		<script src="assets/js/jquery.min.js"> </script>
-		<script src="assets/js/bootstrap.bundle.min.js"> </script>
-		{% block javascripts %}{% endblock %}
-	</body>
+	{% block content %}{% endblock %}
+</div>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+{% block javascripts %}{% endblock %}
+</body>
 </html>
