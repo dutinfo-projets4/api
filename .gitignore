@@ -9,3 +9,6 @@
 ###> symfony/web-server-bundle ###
 .web-server-pid
 ###< symfony/web-server-bundle ###
+
+###Les personnes sous OSX ###
+.DS_Store
