@@ -7,93 +7,87 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\GroupRepository")
  */
-class Group
-{
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+class Group {
+	/**
+	 * @ORM\Id
+	 * @ORM\GeneratedValue
+	 * @ORM\Column(type="integer")
+	 */
+	private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $name;
+	/**
+	 * @ORM\Column(type="string", length=255)
+	 */
+	private $name;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $lastUpdateTS;
+	/**
+	 * @ORM\Column(type="datetime")
+	 */
+	private $lastUpdateTS;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Element", mappedBy="group")
-     */
-    private $elements;
+	/**
+	 * Sub-group for the current group
+	 * @ORM\OneToMany(targetEntity="App\Entity\Group")
+	 */
+	private $groups;
 
-    /**
-     * @return mixed
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
+	/**
+	 * @ORM\OneToMany(targetEntity="App\Entity\Element", mappedBy="group")
+	 */
+	private $elements;
 
-    /**
-     * @param mixed $id
-     */
-    public function setId($id): void
-    {
-        $this->id = $id;
-    }
+	/**
+	 * @return int Identifier of the group
+	 */
+	public function getID() {
+		return $this->id;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
+	/**
+	 * @param int $id
+	 */
+	public function setID($id): void {
+		$this->id = $id;
+	}
 
-    /**
-     * @param mixed $name
-     */
-    public function setName($name): void
-    {
-        $this->name = $name;
-    }
+	/**
+	 * @return string
+	 */
+	public function getName() {
+		return $this->name;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getLastUpdateTS()
-    {
-        return $this->lastUpdateTS;
-    }
+	/**
+	 * @param string $name
+	 */
+	public function setName($name): void {
+		$this->name = $name;
+	}
 
-    /**
-     * @param mixed $lastUpdateTS
-     */
-    public function setLastUpdateTS($lastUpdateTS): void
-    {
-        $this->lastUpdateTS = $lastUpdateTS;
-    }
+	/**
+	 * @return datetime
+	 */
+	public function getLastUpdateTS() {
+		return $this->lastUpdateTS;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getElements()
-    {
-        return $this->elements;
-    }
+	/**
+	 * @param datetime $lastUpdateTS
+	 */
+	public function setLastUpdateTS($lastUpdateTS): void {
+		$this->lastUpdateTS = $lastUpdateTS;
+	}
 
-    /**
-     * @param mixed $elements
-     */
-    public function setElements($elements): void
-    {
-        $this->elements = $elements;
-    }
+	/**
+	 * @return Array<Element>
+	 */
+	public function getElements() {
+		return $this->elements;
+	}
 
+	/**
+	 * @TODO Add element
+	 * @TODO Remove element
+	 */
 
 }

@@ -7,159 +7,126 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
-class User
-{
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+class User {
+	/**
+	 * @ORM\Id
+	 * @ORM\GeneratedValue
+	 * @ORM\Column(type="integer")
+	 */
+	private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $username;
+	/**
+	 * @ORM\Column(type="string", length=255)
+	 */
+	private $username;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $password;
+	/**
+	 * @ORM\Column(type="string", length=255)
+	 */
+	private $password;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $email;
+	/**
+	 * @ORM\Column(type="string", length=255)
+	 */
+	private $email;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $isAdmin;
+	/**
+	 * @ORM\Column(type="boolean")
+	 */
+	private $isAdmin;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Element", mappedBy="user")
-     */
-    private $elements;
+	/**
+	 * @ORM\OneToMany(targetEntity="App\Entity\Element", mappedBy="user")
+	 */
+	private $elements;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Token", mappedBy="user")
-     */
-    private $tokens;
+	/**
+	 * @ORM\OneToMany(targetEntity="App\Entity\Token", mappedBy="user")
+	 */
+	private $tokens;
 
+	/**
+	 * @return int Identifier for the user
+	 */
+	public function getID() {
+		return $this->id;
+	}
 
+	/**
+	 * @param int $id
+	 */
+	public function setID($id): void {
+		$this->id = $id;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
+	/**
+	 * @return string User's name
+	 */
+	public function getUsername() {
+		return $this->username;
+	}
 
-    /**
-     * @param mixed $id
-     */
-    public function setId($id): void
-    {
-        $this->id = $id;
-    }
+	/**
+	 * @param string $username
+	 */
+	public function setUsername($username): void {
+		$this->username = $username;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getUsername()
-    {
-        return $this->username;
-    }
+	/**
+	 * @return string SHA512'd password
+	 */
+	public function getPassword() {
+		return $this->password;
+	}
 
-    /**
-     * @param mixed $username
-     */
-    public function setUsername($username): void
-    {
-        $this->username = $username;
-    }
+	/**
+	 * @param string $password
+	 */
+	public function setPassword($password): void {
+		$this->password = $password;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getPassword()
-    {
-        return $this->password;
-    }
+	/**
+	 * @return string User's email
+	 */
+	public function getEmail() {
+		return $this->email;
+	}
 
-    /**
-     * @param mixed $password
-     */
-    public function setPassword($password): void
-    {
-        $this->password = $password;
-    }
+	/**
+	 * @param string $email
+	 */
+	public function setEmail($email): void {
+		$this->email = $email;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getEmail()
-    {
-        return $this->email;
-    }
+	/**
+	 * @return bool
+	 */
+	public function isAdmin() {
+		return $this->isAdmin;
+	}
 
-    /**
-     * @param mixed $email
-     */
-    public function setEmail($email): void
-    {
-        $this->email = $email;
-    }
+	/**
+	 * @param bool $isAdmin
+	 */
+	public function setAdmin($isAdmin): void {
+		$this->isAdmin = $isAdmin;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getisAdmin()
-    {
-        return $this->isAdmin;
-    }
+	/**
+	 * @return Group
+	 */
+	public function getRootGroup() {
+		return $this->rootGroup;
+	}
 
-    /**
-     * @param mixed $isAdmin
-     */
-    public function setIsAdmin($isAdmin): void
-    {
-        $this->isAdmin = $isAdmin;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getElements()
-    {
-        return $this->elements;
-    }
-
-    /**
-     * @param mixed $elements
-     */
-    public function setElements($elements): void
-    {
-        $this->elements = $elements;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTokens()
-    {
-        return $this->tokens;
-    }
-
-    /**
-     * @param mixed $tokens
-     */
-    public function setTokens($tokens): void
-    {
-        $this->tokens = $tokens;
-    }
-
-
+	/**
+	 * @return Token[]
+	 */
+	public function getTokens() {
+		return $this->tokens;
+	}
 
 }

@@ -8,136 +8,106 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ElementRepository")
  */
-class Element
-{
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+class Element {
+	/**
+	 * @ORM\Id
+	 * @ORM\GeneratedValue
+	 * @ORM\Column(type="integer")
+	 */
+	private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $name;
+	/**
+	 * @ORM\Column(type="text")
+	 */
+	private $content;
 
-    /**
-     * @ORM\Column(type="text")
-     */
-    private $content;
+	/**
+	 * @ORM\Column(type="datetime")
+	 */
+	private $lastUpdateTS;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $lastUpdateTS;
+	/**
+	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="elements")
+	 */
+	private $user;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="elements")
-     */
-    private $user;
+	/**
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Group", inversedBy="elements")
+	 */
+	private $group;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Group", inversedBy="elements")
-     */
-    private $group;
+	/**
+	 * @return int Identifier for the element
+	 */
+	public function getID() {
+		return $this->id;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
+	/**
+	 * @param int $id
+	 */
+	public function setID($id): void
+	{
+		$this->id = $id;
+	}
 
-    /**
-     * @param mixed $id
-     */
-    public function setId($id): void
-    {
-        $this->id = $id;
-    }
+	/**
+	 * @return string Content
+	 */
+	public function getContent() {
+		return $this->content;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
+	/**
+	 * @param string $content
+	 */
+	public function setContent($content): void {
+		$this->content = $content;
+	}
 
-    /**
-     * @param mixed $name
-     */
-    public function setName($name): void
-    {
-        $this->name = $name;
-    }
+	/**
+	 * @return datetime
+	 */
+	public function getLastUpdateTS() {
+		return $this->lastUpdateTS;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getContent()
-    {
-        return $this->content;
-    }
+	/**
+	 * @param datetime $lastUpdateTS
+	 */
+	public function setLastUpdateTS($lastUpdateTS): void {
+		$this->lastUpdateTS = $lastUpdateTS;
+	}
 
-    /**
-     * @param mixed $content
-     */
-    public function setContent($content): void
-    {
-        $this->content = $content;
-    }
+	/**
+	 * @return User
+	 */
+	public function getUser()
+	{
+		return $this->user;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getLastUpdateTS()
-    {
-        return $this->lastUpdateTS;
-    }
+	/**
+	 * @param User $user
+	 */
+	public function setUser($user): void
+	{
+		$this->user = $user;
+	}
 
-    /**
-     * @param mixed $lastUpdateTS
-     */
-    public function setLastUpdateTS($lastUpdateTS): void
-    {
-        $this->lastUpdateTS = $lastUpdateTS;
-    }
+	/**
+	 * @return Group
+	 */
+	public function getGroup()
+	{
+		return $this->group;
+	}
 
-    /**
-     * @return mixed
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
-     * @param mixed $user
-     */
-    public function setUser($user): void
-    {
-        $this->user = $user;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getGroup()
-    {
-        return $this->group;
-    }
-
-    /**
-     * @param mixed $group
-     */
-    public function setGroup($group): void
-    {
-        $this->group = $group;
-    }
-
-
+	/**
+	 * @param Group $group
+	 */
+	public function setGroup($group): void {
+		$this->group = $group;
+	}
 
 }

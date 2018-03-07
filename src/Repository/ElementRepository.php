@@ -12,23 +12,10 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method Element[]    findAll()
  * @method Element[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ElementRepository extends ServiceEntityRepository
-{
-    public function __construct(RegistryInterface $registry)
-    {
-        parent::__construct($registry, Element::class);
-    }
+class ElementRepository extends ServiceEntityRepository {
 
-    /*
-    public function findBySomething($value)
-    {
-        return $this->createQueryBuilder('e')
-            ->where('e.something = :value')->setParameter('value', $value)
-            ->orderBy('e.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+	public function __construct(RegistryInterface $registry) {
+		parent::__construct($registry, Element::class);
+	}
+
 }
