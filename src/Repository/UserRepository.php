@@ -19,6 +19,15 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
+    public function log_with_challenge($pass, $challenge)
+    {
+        return $this->createQueryBuilder('u')
+            ->where('SHA2(SHA2(u.username, 512)' + $challenge + 'SHA2(u.password, 512), 512) = :value_login')->setParameter('value_login', $pass)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getResult();
+    }
+
     /*
     public function findBySomething($value)
     {

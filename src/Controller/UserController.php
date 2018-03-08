@@ -9,19 +9,21 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-class UserController extends Controller {
-	/**
-	 * @Route("/users", name="user")
-	 */
-	public function register() {
-		$request = Request::createFromGlobals();
-		$response = new Response();
-		$response->setStatusCode(Response::HTTP_BAD_REQUEST);
+class UserController extends Controller
+{
+    /**
+     * @Route("/users", name="user")
+     */
+    public function index()
+    {
+        $request = Request::createFromGlobals();
+        $response = new Response();
+        $response->setStatusCode(Response::HTTP_BAD_REQUEST);
 
 		if($request->getMethod() == 'PUT' && !empty($request->query->get('username')) && !empty($request->query->get('email')) && !empty($request->query->get('password')) && !empty($request->query->get('machine_name')) && !empty($request->query->get('publickey'))) {
 
-			if($this->getDoctrine()->getRepository(User::class)->findByEmail($request->query->get('email')) == null
-				&& $this->getDoctrine()->getRepository(User::class)->findByUsername($request->query->get('username')) == null){
+            if($this->getDoctrine()->getRepository(User::class)->findByEmail($request->query->get('email'))->findAll() == null
+                && $this->getDoctrine()->getRepository(User::class)->findByUsername($request->query->get('username'))->findAll() == null){
 
 				$user = new User();
 				$token = new Token();
@@ -40,8 +42,12 @@ class UserController extends Controller {
 
 				$this->getDoctrine()->getManager()->persist($user);
 				$this->getDoctrine()->getManager()->flush();
-
-				$response->setStatusCode(Response::HTTP_CREATED);
+                $response->setStatusCode(Response::HTTP_CREATED);
+                $response->setContent(json_encode([
+                    "id" => $user->getId(),
+                    "token" => $token->getToken(),
+                ]));
+                $response->headers->set('Content-Type', 'application/json');
 
 			}
 			else{
@@ -49,7 +55,22 @@ class UserController extends Controller {
 			}
 
 		}
+        else if($request->getMethod() == 'POST' && !empty($request->query->get('passcode')) && !empty($request->query->get('challenge'))
+            && !empty($request->query->get('machine_name')) && !empty($request->query->get('publickey'))){
 
-		$response->send();
-	}
+            $response->setStatusCode(Response::HTTP_FORBIDDEN);
+            if(!is_null($this->getDoctrine()->getRepository(User::class)->log_with_challenge($request->get('passcode'), $request->get('challenge'))->findAll())){
+                $user = $this->getDoctrine()->getRepository(User::class)
+                    ->log_with_challenge($request->get('passcode'))
+                    ->findAll();
+
+                $response->setStatusCode(Response::HTTP_OK);
+
+            }
+
+        }
+
+        $response->send();
+
+    }
 }

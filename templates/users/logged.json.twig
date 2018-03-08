@@ -1,0 +1,30 @@
+{
+    "id": {{ user.id }},
+    "username": {{ user.username }},
+    "email": {{ user.email }},
+    "isAdmin": {{ user.isAdmin }},
+    "token": {{ token.id }},
+    "data" : {
+        "group": [
+            {
+                "id": 123,
+                "parent": 123, // Can be -1 for the root group
+                "content": "Encrypted JSON containing a group"
+            }
+        ],
+        "element": [
+            {
+                "id": 12,
+                "group": 123,
+                "content": "Encrypted JSON containing an element"
+            }
+        ],
+        "config": [
+            {
+                "id": 1,
+                "name": "The config name",
+                "value": "The selected value"
+            }
+        ]
+    }
+}
