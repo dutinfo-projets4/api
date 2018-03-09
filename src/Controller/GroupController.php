@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Element;
 use App\Entity\Group;
 use App\Entity\User;
 use App\Utils\RequestUtils;
@@ -93,10 +94,16 @@ class GroupController extends Controller {
 
 					$group = $this->getDoctrine()->getRepository(Group::class)->find($request->get('id'));
 
+					$elements = $this->getDoctrine()->getRepository(Element::class)->findByGroup($group);
+
 					$this->getDoctrine()->getManager()->remove($group);
 					$this->getDoctrine()->getManager()->flush();
 
 					$response->setStatusCode(Response::HTTP_GONE);
+
+					$response->setData([
+						'deleted' => $elements,
+					]);
 
 				}
 
