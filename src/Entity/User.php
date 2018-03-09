@@ -35,10 +35,15 @@ class User {
 	 */
 	private $isAdmin;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="App\Entity\Element", mappedBy="user")
-	 */
-	private $elements;
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Element", mappedBy="user")
+     */
+    private $elements;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Group", mappedBy="user")
+     */
+    private $groups;
 
 	/**
 	 * @ORM\OneToMany(targetEntity="App\Entity\Token", mappedBy="user")
@@ -128,5 +133,39 @@ class User {
 	public function getTokens() {
 		return $this->tokens;
 	}
+
+    /**
+     * @return Array<Element>
+     */
+    public function getElements()
+    {
+        return $this->elements;
+    }
+
+    /**
+     * @param Array<Element>
+     */
+    public function setElements($elements): void
+    {
+        $this->elements = $elements;
+    }
+
+    /**
+     * @return Array<Group>
+     */
+    public function getGroups()
+    {
+        return $this->groups;
+    }
+
+    /**
+     * @param Array<Group>
+     */
+    public function setGroups($groups): void
+    {
+        $this->groups = $groups;
+    }
+
+
 
 }
