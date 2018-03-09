@@ -30,9 +30,10 @@ class Challenge {
 	/**
 	 * @param int $id
 	 */
-	public function setID($id): void
+	public function setID($id): Challenge
 	{
 		$this->id = $id;
+		return $this;
 	}
 
 	/**
@@ -46,9 +47,10 @@ class Challenge {
 	/**
 	 * @param string $challenge
 	 */
-	public function setChallenge($challenge): void
+	public function setChallenge($challenge): Challenge
 	{
 		$this->challenge = $challenge;
+		return $this;
 	}
 
 
