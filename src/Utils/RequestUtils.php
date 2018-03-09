@@ -6,6 +6,26 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RequestUtils {
 
+	public static function checkAuth(Request $rq){
+		return RequestUtils::checkHeaders($rq, array('User-Agent', 'X-ALOHOMORA-TOKEN', 'X-ALOHOMORA-SIGNATURE'));
+	}
+
+	public static function checkUAOnly(Request $rq){
+		return RequestUtils::checkHeaders($rq, array('User-Agent'));
+	}
+
+	public static function checkHeaders(Request $rq, Array $arr) {
+		$empt = true;
+
+		foreach($rq as $r) {
+			$empt = !empty($rq->headers->get($r));
+
+			if (!$empt) break;
+		}
+
+		return $empt;
+	}
+
 	public static function checkGET(Request $rq, Array $param) {
 		return RequestUtils::checkMethod($rq, 'GET', $param);
 	}
