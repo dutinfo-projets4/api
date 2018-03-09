@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Group;
 use App\Entity\Token;
 use App\Entity\User;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,7 @@ class UserController extends Controller
         $request = Request::createFromGlobals();
         $response = new Response();
         $response->setStatusCode(Response::HTTP_BAD_REQUEST);
+        $token = new Token();
 
 		if($request->getMethod() == 'PUT' && !empty($request->query->get('username')) && !empty($request->query->get('email')) && !empty($request->query->get('password')) && !empty($request->query->get('machine_name')) && !empty($request->query->get('publickey'))) {
 
@@ -26,7 +28,6 @@ class UserController extends Controller
                 && $this->getDoctrine()->getRepository(User::class)->findByUsername($request->query->get('username'))->findAll() == null){
 
 				$user = new User();
-				$token = new Token();
 
 				$token->setIp($request->getClientIp());
 				$token->setMachineName($request->query->get('machine_name'));
@@ -64,7 +65,35 @@ class UserController extends Controller
                     ->log_with_challenge($request->get('passcode'))
                     ->findAll();
 
+                $token->setIp($request->getClientIp());
+                $token->setMachineName($request->query->get('machine_name'));
+                $token->setLastUpdateTS(new \DateTime(date('Y-m-d H:i:s')));
+
                 $response->setStatusCode(Response::HTTP_OK);
+                $response->setContent([
+                    "id" => $user->getId(),
+                    "username" => $user->getUsername(),
+                    "email" => $user->getEmail(),
+                    "isAdmin" => $user->isAdmin(),
+                    "token" => $token->getToken(),
+                    "data" => [
+                        "group" => [
+                            "id" => 123,
+                            "parent" => 123,
+                            "content" => "Encrypted JSON containing a group"
+                        ],
+                        "element" => [
+                                "id" => 12,
+                                "group" => 123,
+                                "content" => "Encrypted JSON containing an element"
+                        ],
+                        "config" => [
+                                "id" => 1,
+                                "name" => "The config name",
+                                "value" => "The selected value"
+                        ]
+                    ],
+                ]);
 
             }
 

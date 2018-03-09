@@ -31,10 +31,15 @@ class Group {
 	 */
 	private $groups;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="App\Entity\Element", mappedBy="group")
-	 */
-	private $elements;
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Element", mappedBy="group")
+     */
+    private $elements;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="group")
+     */
+    private $user;
 
 	/**
 	 * @return int Identifier of the group
@@ -84,6 +89,40 @@ class Group {
 	public function getElements() {
 		return $this->elements;
 	}
+
+    /**
+     * @return Array<Group>
+     */
+    public function getGroups()
+    {
+        return $this->groups;
+    }
+
+    /**
+     * @param Array<Group>
+     */
+    public function setGroups($groups): void
+    {
+        $this->groups = $groups;
+    }
+
+    /**
+     * @return User isntance
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param User instance
+     */
+    public function setUser($user): void
+    {
+        $this->user = $user;
+    }
+
+
 
 	/**
 	 * @TODO Add element
