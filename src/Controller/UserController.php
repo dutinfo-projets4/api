@@ -96,8 +96,8 @@ class UserController extends Controller
 					"isAdmin" => $user->isAdmin(),
 					"token" => $token->getToken(),
 					"data" => [
-						"groups" => $group_to_array,
-						"elements" => $elements_in_group,
+						"groups" => $groupArray,
+						"elements" => $elementArray,
 					],
 				]);
 			}
