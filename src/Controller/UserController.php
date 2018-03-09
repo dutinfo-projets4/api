@@ -103,6 +103,6 @@ class UserController extends Controller
 			}
 		}
 
-		$response->send();
+		return $response;
 	}
 }
