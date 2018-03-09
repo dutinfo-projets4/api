@@ -19,15 +19,16 @@ class ChallengeController extends Controller
 		$string_alphanumeric = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 		$randomString = "";
 
-		for($i = 0; $i < 255; $i++){
-			$randomString .= $string_alphanumeric[random_int(0, strlen($string_alphanumeric))];
+		for($i = 0; $i < 64; $i++){
+			$chr = rand(0, strlen($string_alphanumeric));
+			$randomString .= substr($string_alphanumeric, $chr, 1);
 		}
 
 		$this->getDoctrine()->getManager()->persist((new Challenge())->setChallenge($randomString));
 		$this->getDoctrine()->getManager()->flush();
 
 		return (new JsonResponse())->setData([
-			"id" => $challenge->getId(),
+			"id" => $challenge->getID(),
 			"challenge" => $challenge->getChallenge(),
 		]);
 
