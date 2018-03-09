@@ -22,90 +22,78 @@ class GroupController extends Controller {
 		$response = new JsonResponse();
 		$response->setStatusCode(Response::HTTP_BAD_REQUEST);
 
-		if (RequestUtils::checkPOST($request, array())){
+		if (RequestUtils::checkPOST($request, array('parent_grp', 'content', 'name'))){
 
-			if(!empty($request->get('parent_grp')) && !empty($request->get('content')) && !empty($request->headers->get('Token'))){
+			$group = new Group();
 
-				$group = new Group();
+			if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->get('parent_grp')))
+			&& !is_null($this->getDoctrine()->getRepository(User::class)->find($request->headers->get('Token')))){
 
-				if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->get('parent_grp')))
-				&& !is_null($this->getDoctrine()->getRepository(User::class)->find($request->headers->get('Token')))){
+				$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->get('parent_grp'));
+				$user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('Token'));
 
-					$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->get('parent_grp'));
-					$user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('Token'));
+				$group->setContent($request->get('content'));
+				$group->setParentGroup($parent);
+				$group->setName($request->get('name'));
+				$group->setUser($user);
 
-					$group->setContent($request->get('content'));
-					$group->setParentGroup($parent);
-					$group->setName($request->get('name'));
-					$group->setUser($user);
+				$this->getDoctrine()->getManager()->persist($group);
+				$this->getDoctrine()->getManager()->flush();
 
-					$this->getDoctrine()->getManager()->persist($group);
-					$this->getDoctrine()->getManager()->flush();
-
-					$response->setStatusCode(Response::HTTP_CREATED);
-					$response->setData([
-						'id' => $group->getID(),
-					]);
-
-				}
+				$response->setStatusCode(Response::HTTP_CREATED);
+				$response->setData([
+					'id' => $group->getID(),
+				]);
 
 			}
 
-		} else if (RequestUtils::checkPUT($request, array())){
+		} else if (RequestUtils::checkPUT($request, array('parent_grp', 'id', 'name', 'content'))){
 
-			if(!empty($request->get('parent_grp')) && !empty($request->get('id'))
-				&& !empty($request->get('content')) && !empty($request->get('name')) && !empty($request->headers->get('Token'))){
-				$response->setStatusCode(Response::HTTP_NOT_FOUND);
+			$response->setStatusCode(Response::HTTP_NOT_FOUND);
 
-				if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->get('parent_grp')))
-					&& !is_null($this->getDoctrine()->getRepository(User::class)->find($request->headers->get('Token')))){
+			if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->get('parent_grp')))
+				&& !is_null($this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token')))){
 
 
-					$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->get('parent_grp'));
-					$user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('Token'));
+				$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->get('parent_grp'));
+				$user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token'));
 
-					$group = $this->getDoctrine()->getRepository(Group::class)->findOneBy([
-						'user' => $user,
-						'parent' => $parent,
-						'id' => $request->headers->get('id'),
-					]);
+				$group = $this->getDoctrine()->getRepository(Group::class)->findOneBy([
+					'user' => $user,
+					'parent' => $parent,
+					'id' => $request->headers->get('id'),
+				]);
 
-					$group->setContent($request->get('content'));
-					$group->setParentGroup($parent);
-					$group->setName($request->get('name'));
-					$group->setUser($user);
+				$group->setContent($request->get('content'));
+				$group->setParentGroup($parent);
+				$group->setName($request->get('name'));
+				$group->setUser($user);
 
-					$this->getDoctrine()->getManager()->persist($group);
-					$this->getDoctrine()->getManager()->flush();
+				$this->getDoctrine()->getManager()->persist($group);
+				$this->getDoctrine()->getManager()->flush();
 
-					$response->setStatusCode(Response::HTTP_OK);
-
-				}
+				$response->setStatusCode(Response::HTTP_OK);
 
 			}
 
-		} else if (RequestUtils::checkDELETE($request, array())){
+		} else if (RequestUtils::checkDELETE($request, array('id'))){
 
-			if(!empty($request->get('id'))){
+			$response->setStatusCode(Response::HTTP_NOT_FOUND);
 
-				$response->setStatusCode(Response::HTTP_NOT_FOUND);
+			if(!empty($this->getDoctrine()->getRepository(Group::class)->find($request->get('id')))){
 
-				if(!empty($this->getDoctrine()->getRepository(Group::class)->find($request->get('id')))){
+				$group = $this->getDoctrine()->getRepository(Group::class)->find($request->get('id'));
 
-					$group = $this->getDoctrine()->getRepository(Group::class)->find($request->get('id'));
+				$elements = $this->getDoctrine()->getRepository(Element::class)->findByGroup($group);
 
-					$elements = $this->getDoctrine()->getRepository(Element::class)->findByGroup($group);
+				$this->getDoctrine()->getManager()->remove($group);
+				$this->getDoctrine()->getManager()->flush();
 
-					$this->getDoctrine()->getManager()->remove($group);
-					$this->getDoctrine()->getManager()->flush();
+				$response->setStatusCode(Response::HTTP_GONE);
 
-					$response->setStatusCode(Response::HTTP_GONE);
-
-					$response->setData([
-						'deleted' => $elements,
-					]);
-
-				}
+				$response->setData([
+					'deleted' => $elements,
+				]);
 
 			}
 
