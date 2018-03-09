@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Element;
 use App\Entity\Group;
 use App\Entity\Token;
 use App\Entity\User;
+use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -29,7 +31,7 @@ class UserController extends Controller
 
 				$user = new User();
 
-				$token->setIp($request->getClientIp());
+				$token->setIP($request->getClientIp());
 				$token->setMachineName($request->query->get('machine_name'));
 				$token->setLastUpdateTS(new \DateTime(date('Y-m-d H:i:s')));
 
@@ -65,33 +67,42 @@ class UserController extends Controller
                     ->log_with_challenge($request->get('passcode'))
                     ->findAll();
 
-                $token->setIp($request->getClientIp());
+                $token->setIP($request->getClientIp());
                 $token->setMachineName($request->query->get('machine_name'));
                 $token->setLastUpdateTS(new \DateTime(date('Y-m-d H:i:s')));
 
+	            $group = $this->getDoctrine()->getRepository(Group::class)->findBy([
+		            'user' => $user,
+	            ]);
+	            $elements = $this->getDoctrine()->getRepository(Element::class)->findBy([
+		            'user' => $user,
+	            ]);
+
+                $group_to_array = array();
+	            $elements_in_group = array();
+
+				foreach ($group as $g){
+
+					array_push($group_to_array, $g);
+
+				}
+
+	            foreach ($elements as $e){
+		            array_push($elements_in_group, $e);
+	            }
+
                 $response->setStatusCode(Response::HTTP_OK);
                 $response->setContent([
-                    "id" => $user->getId(),
+                    "id" => $user->getID(),
                     "username" => $user->getUsername(),
                     "email" => $user->getEmail(),
                     "isAdmin" => $user->isAdmin(),
                     "token" => $token->getToken(),
                     "data" => [
-                        "group" => [
-                            "id" => 123,
-                            "parent" => 123,
-                            "content" => "Encrypted JSON containing a group"
-                        ],
-                        "element" => [
-                                "id" => 12,
-                                "group" => 123,
-                                "content" => "Encrypted JSON containing an element"
-                        ],
-                        "config" => [
-                                "id" => 1,
-                                "name" => "The config name",
-                                "value" => "The selected value"
-                        ]
+
+	                    "groups" => $group_to_array,
+	                    "elements" => $elements_in_group,
+
                     ],
                 ]);
 

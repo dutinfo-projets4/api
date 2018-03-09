@@ -21,13 +21,18 @@ class Group {
 	private $name;
 
 	/**
+	 * @ORM\Column(type="text")
+	 */
+	private $content;
+
+	/**
 	 * @ORM\Column(type="datetime")
 	 */
 	private $lastUpdateTS;
 
 	/**
 	 * Sub-group for the current group
-	 * @ORM\OneToMany(targetEntity="App\Entity\Group")
+	 * @ORM\OneToMany(targetEntity="App\Entity\Group", mappedBy="group")
 	 */
 	private $groups;
 
@@ -36,10 +41,15 @@ class Group {
      */
     private $elements;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="group")
-     */
-    private $user;
+	/**
+	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="group")
+	 */
+	private $user;
+
+	/**
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Group", inversedBy="group")
+	 */
+	private $parent;
 
 	/**
 	 * @return int Identifier of the group
@@ -122,6 +132,48 @@ class Group {
         $this->user = $user;
     }
 
+	/**
+	 * @return Group instance
+	 */
+	public function getParentGroup()
+	{
+		return $this->parent;
+	}
+
+	/**
+	 * @param Group instance
+	 */
+	public function setParentGroup($parent): void
+	{
+		$this->parent = $parent;
+	}
+
+	/**
+	 * @return String
+	 */
+	public function getContent()
+	{
+		return $this->content;
+	}
+
+	/**
+	 * @param String content
+	 */
+	public function setContent($content): void
+	{
+		$this->content = $content;
+	}
+
+
+
+    public function toArray()
+    {
+    	return [
+		    "id" => $this->getID(),
+    		"parent" => $this->getParentGroup(),
+    		"content" => $this->getContent(),
+	    ];
+    }
 
 
 	/**

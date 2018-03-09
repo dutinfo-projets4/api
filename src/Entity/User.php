@@ -135,22 +135,6 @@ class User {
 	}
 
     /**
-     * @return boolean true if is admin, else false
-     */
-    public function getisAdmin()
-    {
-        return $this->isAdmin;
-    }
-
-    /**
-     * @param boolean true if is admin, else false
-     */
-    public function setIsAdmin($isAdmin): void
-    {
-        $this->isAdmin = $isAdmin;
-    }
-
-    /**
      * @return Array<Element>
      */
     public function getElements()
