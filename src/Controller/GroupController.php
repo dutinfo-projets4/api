@@ -26,15 +26,15 @@ class GroupController extends Controller {
 
 			$group = new Group();
 
-			if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->get('parent_grp')))
+			if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp')))
 			&& !is_null($this->getDoctrine()->getRepository(User::class)->find($request->headers->get('Token')))){
 
-				$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->get('parent_grp'));
+				$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp'));
 				$user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('Token'));
 
-				$group->setContent($request->get('content'));
+				$group->setContent($request->query->get('content'));
 				$group->setParentGroup($parent);
-				$group->setName($request->get('name'));
+				$group->setName($request->query->get('name'));
 				$group->setUser($user);
 
 				$this->getDoctrine()->getManager()->persist($group);
@@ -51,11 +51,11 @@ class GroupController extends Controller {
 
 			$response->setStatusCode(Response::HTTP_NOT_FOUND);
 
-			if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->get('parent_grp')))
+			if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp')))
 				&& !is_null($this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token')))){
 
 
-				$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->get('parent_grp'));
+				$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp'));
 				$user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token'));
 
 				$group = $this->getDoctrine()->getRepository(Group::class)->findOneBy([
@@ -64,9 +64,9 @@ class GroupController extends Controller {
 					'id' => $request->headers->get('id'),
 				]);
 
-				$group->setContent($request->get('content'));
+				$group->setContent($request->query->get('content'));
 				$group->setParentGroup($parent);
-				$group->setName($request->get('name'));
+				$group->setName($request->query->get('name'));
 				$group->setUser($user);
 
 				$this->getDoctrine()->getManager()->persist($group);
@@ -80,9 +80,9 @@ class GroupController extends Controller {
 
 			$response->setStatusCode(Response::HTTP_NOT_FOUND);
 
-			if(!empty($this->getDoctrine()->getRepository(Group::class)->find($request->get('id')))){
+			if(!empty($this->getDoctrine()->getRepository(Group::class)->find($request->query->get('id')))){
 
-				$group = $this->getDoctrine()->getRepository(Group::class)->find($request->get('id'));
+				$group = $this->getDoctrine()->getRepository(Group::class)->find($request->query->get('id'));
 
 				$elements = $this->getDoctrine()->getRepository(Element::class)->findByGroup($group);
 

@@ -33,7 +33,7 @@ class UserController extends Controller
 
 				$user = new User();
 
-				$token->setIP($request->getClientIp());
+				$token->setIP($request->query->getClientIp());
 				$token->setMachineName($request->query->get('machine_name'));
 				$token->setLastUpdateTS(new \DateTime(date('Y-m-d H:i:s')));
 
@@ -60,12 +60,12 @@ class UserController extends Controller
 
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
 
-			if(!is_null($this->getDoctrine()->getRepository(User::class)->log_with_challenge($request->get('passcode'), $request->get('challenge'))->findAll())) {
+			if(!is_null($this->getDoctrine()->getRepository(User::class)->log_with_challenge($request->query->get('passcode'), $request->query->get('challenge'))->findAll())) {
 				$user = $this->getDoctrine()->getRepository(User::class)
-					->log_with_challenge($request->get('passcode'))
+					->log_with_challenge($request->query->get('passcode'))
 					->findAll();
 
-				$token->setIP($request->getClientIp());
+				$token->setIP($request->query->getClientIp());
 				$token->setMachineName($request->query->get('machine_name'));
 				$token->setLastUpdateTS(new \DateTime(date('Y-m-d H:i:s')));
 
@@ -112,7 +112,7 @@ class UserController extends Controller
 
 				$users = $this->getDoctrine()->getRepository(User::class)->findBy([
 
-				], null, $request->get('limit'), $request->get('offset'));
+				], null, $request->query->get('limit'), $request->query->get('offset'));
 
 				$response->setStatusCode(Response::HTTP_OK);
 				$response->setData([
@@ -130,12 +130,12 @@ class UserController extends Controller
 
 			if($current_token->getUser()->isAdmin()){
 
-				$user = $this->getDoctrine()->getRepository(User::class)->find($request->get('id'));
+				$user = $this->getDoctrine()->getRepository(User::class)->find($request->query->get('id'));
 
-				$user->setUsername($request->get('username'))
-					->setEmail($request->get('email'))
-					->setAdmin($request->get('isAdmin'))
-					->setPassword($request->get('password'));
+				$user->setUsername($request->query->get('username'))
+					->setEmail($request->query->get('email'))
+					->setAdmin($request->query->get('isAdmin'))
+					->setPassword($request->query->get('password'));
 
 				$response->setStatusCode(Response::HTTP_OK);
 
@@ -148,9 +148,9 @@ class UserController extends Controller
 				'token' => $request->headers->get('token')
 			]);
 
-			if($current_token->getUser()->isAdmin() || $current_token->getUser()->getID() == $request->get('id')){
+			if($current_token->getUser()->isAdmin() || $current_token->getUser()->getID() == $request->query->get('id')){
 
-				$user = $this->getDoctrine()->getRepository(User::class)->find($request->get('id'));
+				$user = $this->getDoctrine()->getRepository(User::class)->find($request->query->get('id'));
 
 				$this->getDoctrine()->getManager()->remove($user);
 				$this->getDoctrine()->getManager()->flush();

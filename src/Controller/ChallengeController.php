@@ -24,7 +24,9 @@ class ChallengeController extends Controller
 			$randomString .= substr($string_alphanumeric, $chr, 1);
 		}
 
-		$this->getDoctrine()->getManager()->persist((new Challenge())->setChallenge($randomString));
+		$challenge = (new Challenge())->setChallenge($randomString);
+
+		$this->getDoctrine()->getManager()->persist($challenge);
 		$this->getDoctrine()->getManager()->flush();
 
 		return (new JsonResponse())->setData([
