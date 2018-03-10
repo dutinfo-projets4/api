@@ -27,10 +27,10 @@ class GroupController extends Controller {
 			$group = new Group();
 
 			if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp')))
-			&& !is_null($this->getDoctrine()->getRepository(User::class)->find($request->headers->get('Token')))){
+			&& !is_null($this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token')))){
 
 				$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp'));
-				$user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('Token'));
+				$user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token'));
 
 				$group->setContent($request->query->get('content'));
 				$group->setParentGroup($parent);
