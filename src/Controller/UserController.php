@@ -101,6 +101,64 @@ class UserController extends Controller
 					],
 				]);
 			}
+		} else if (RequestUtils::checkGET($request, ['limit', 'offset'])){
+
+			$response->setStatusCode(Response::HTTP_FORBIDDEN);
+			$current_token = $this->getDoctrine()->getRepository(Token::class)->findOneBy([
+				'token' => $request->headers->get('token')
+			]);
+
+			if($current_token->getUser()->isAdmin()){
+
+				$users = $this->getDoctrine()->getRepository(User::class)->findBy([
+
+				], null, $request->get('limit'), $request->get('offset'));
+
+				$response->setStatusCode(Response::HTTP_OK);
+				$response->setData([
+					'users' => $users,
+				]);
+
+			}
+
+		} else if (RequestUtils::checkPATCH($request, ['id', 'username', 'email', 'isAdmin', 'password'])){
+
+			$response->setStatusCode(Response::HTTP_FORBIDDEN);
+			$current_token = $this->getDoctrine()->getRepository(Token::class)->findOneBy([
+				'token' => $request->headers->get('token')
+			]);
+
+			if($current_token->getUser()->isAdmin()){
+
+				$user = $this->getDoctrine()->getRepository(User::class)->find($request->get('id'));
+
+				$user->setUsername($request->get('username'))
+					->setEmail($request->get('email'))
+					->setAdmin($request->get('isAdmin'))
+					->setPassword($request->get('password'));
+
+				$response->setStatusCode(Response::HTTP_OK);
+
+			}
+
+		} else if (RequestUtils::checkDELETE($request, ['id'])){
+
+			$response->setStatusCode(Response::HTTP_FORBIDDEN);
+			$current_token = $this->getDoctrine()->getRepository(Token::class)->findOneBy([
+				'token' => $request->headers->get('token')
+			]);
+
+			if($current_token->getUser()->isAdmin() || $current_token->getUser()->getID() == $request->get('id')){
+
+				$user = $this->getDoctrine()->getRepository(User::class)->find($request->get('id'));
+
+				$this->getDoctrine()->getManager()->remove($user);
+				$this->getDoctrine()->getManager()->flush();
+
+				$response->setStatusCode(Response::HTTP_OK);
+
+			}
+
 		}
 
 		return $response;
