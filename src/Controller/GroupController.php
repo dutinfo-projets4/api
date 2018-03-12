@@ -22,15 +22,19 @@ class GroupController extends Controller {
 		$response = new JsonResponse();
 		$response->setStatusCode(Response::HTTP_BAD_REQUEST);
 
+		$current_token = $this->getDoctrine()->getRepository(User::class)->findBy([
+			'token' => $request->headers->get('token'),
+		]);
+
 		if (RequestUtils::checkPOST($request, array('parent_grp', 'content', 'name'))){
 
 			$group = new Group();
 
 			if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp')))
-			&& !is_null($this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token')))){
+			&& !is_null($current_token->getUser())){
 
 				$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp'));
-				$user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token'));
+				$user = $current_token->getUser();
 
 				$group->setContent($request->query->get('content'));
 				$group->setParentGroup($parent);
@@ -52,11 +56,11 @@ class GroupController extends Controller {
 			$response->setStatusCode(Response::HTTP_NOT_FOUND);
 
 			if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp')))
-				&& !is_null($this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token')))){
+				&& !is_null($current_token->getUser())){
 
 
 				$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp'));
-				$user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token'));
+				$user = $current_token->getUser();
 
 				$group = $this->getDoctrine()->getRepository(Group::class)->findOneBy([
 					'user' => $user,
@@ -84,7 +88,9 @@ class GroupController extends Controller {
 
 				$group = $this->getDoctrine()->getRepository(Group::class)->find($request->query->get('id'));
 
-				$elements = $this->getDoctrine()->getRepository(Element::class)->findByGroup($group);
+				$elements = $this->getDoctrine()->getRepository(Element::class)->findBy([
+					'group' => $group,
+				]);
 
 				$this->getDoctrine()->getManager()->remove($group);
 				$this->getDoctrine()->getManager()->flush();

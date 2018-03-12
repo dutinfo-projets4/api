@@ -28,8 +28,8 @@ class UserController extends Controller
 
 		if (RequestUtils::checkPUT($request, array('username', 'email', 'password', 'machine_name', 'publickey'))){
 
-			if($this->getDoctrine()->getRepository(User::class)->findByEmail($request->query->get('email'))->findAll() == null
-				&& $this->getDoctrine()->getRepository(User::class)->findByUsername($request->query->get('username'))->findAll() == null){
+			if($this->getDoctrine()->getRepository(User::class)->findBy(['email' => $request->query->get('email'),]) == null
+				&& $this->getDoctrine()->getRepository(User::class)->findBy(['username' => $request->query->get('username')]) == null){
 
 				$user = new User();
 
@@ -60,10 +60,9 @@ class UserController extends Controller
 
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
 
-			if(!is_null($this->getDoctrine()->getRepository(User::class)->log_with_challenge($request->query->get('passcode'), $request->query->get('challenge'))->findAll())) {
+			if(!is_null($this->getDoctrine()->getRepository(User::class)->log_with_challenge($request->query->get('passcode'), $request->query->get('challenge')))) {
 				$user = $this->getDoctrine()->getRepository(User::class)
-					->log_with_challenge($request->query->get('passcode'))
-					->findAll();
+					->log_with_challenge($request->query->get('passcode'));
 
 				$token->setIP($request->query->getClientIp());
 				$token->setMachineName($request->query->get('machine_name'));
