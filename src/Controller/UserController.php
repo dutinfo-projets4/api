@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Challenge;
 use App\Entity\Directory;
 use App\Entity\Element;
 use App\Entity\Token;
@@ -66,8 +67,9 @@ class UserController extends Controller
 			&& !empty($request->get('machine_name')) && !empty($request->get('challenge'))) {
 
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
+			$challenge = $this->getDoctrine()->getRepository(Challenge::class)->find($request->get('challenge'));
 
-			if(!is_null($this->getDoctrine()->getRepository(User::class)->findAllByPass($request->get('passcode'), $request->get('challenge')))) {
+			if(!is_null($this->getDoctrine()->getRepository(User::class)->findAllByPass($request->get('passcode'), $challenge->getChallenge()))) {
 				$user = $this->getDoctrine()->getRepository(User::class)
 					->findAllByPass($request->get('passcode'), $request->get('challenge'));
 
