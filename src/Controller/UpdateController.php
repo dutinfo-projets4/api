@@ -2,6 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Directory;
+use App\Entity\Element;
+use App\Entity\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +27,7 @@ class UpdateController extends Controller
 		$user = $current_token->getUser();
 
 		if(!is_null($user)) {
-			$group = $this->getDoctrine()->getRepository(Group::class)->findBy([
+			$group = $this->getDoctrine()->getRepository(Directory::class)->findBy([
 				'user' => $user,
 			]);
 

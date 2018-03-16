@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Directory;
 use App\Entity\Element;
-use App\Entity\Group;
 use App\Entity\Token;
 use App\Entity\User;
 use App\Utils\RequestUtils;
@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Validator\Constraints\Uuid;
 
 class UserController extends Controller
 {
@@ -26,49 +27,57 @@ class UserController extends Controller
 		$response->setStatusCode(Response::HTTP_BAD_REQUEST);
 		$token = new Token();
 
-		if (RequestUtils::checkPUT($request, array('username', 'email', 'password', 'machine_name', 'publickey'))){
+		if ($request->getMethod() == 'PUT' && !empty($request->get('email'))
+			&& !empty($request->get('username')) && !empty($request->get('password'))
+			&& !empty($request->get('machine_name'))){
 
-			if($this->getDoctrine()->getRepository(User::class)->findBy(['email' => $request->query->get('email'),]) == null
-				&& $this->getDoctrine()->getRepository(User::class)->findBy(['username' => $request->query->get('username')]) == null){
+			if($this->getDoctrine()->getRepository(User::class)->findBy(['email' => $request->get('email'),]) == null
+				&& $this->getDoctrine()->getRepository(User::class)->findBy(['username' => $request->get('username')]) == null){
 
 				$user = new User();
 
-				$token->setIP($request->query->getClientIp());
-				$token->setMachineName($request->query->get('machine_name'));
-				$token->setLastUpdateTS(new \DateTime(date('Y-m-d H:i:s')));
-
-				$this->getDoctrine()->getManager()->persist($token);
-				$this->getDoctrine()->getManager()->flush();
-
-				$user->setEmail($request->query->get('email'));
-				$user->setPassword($request->query->get('password'));
-				$user->setTokens($request->query->get($token));
-				$user->setUsername($request->query->get('username'));
+				$user->setEmail($request->get('email'));
+				$user->setPassword($request->get('password'));
+				$user->setUsername($request->get('username'));
+				$user->setAdmin(0);
 
 				$this->getDoctrine()->getManager()->persist($user);
 				$this->getDoctrine()->getManager()->flush();
 
+				$token->setIP($request->getClientIp());
+				$token->setMachineName($request->get('machine_name'));
+				$token->setLastUpdateTS(new \DateTime(date('Y-m-d H:i:s')));
+				$token->setLoginTS(new \DateTime(date('Y-m-d H:i:s')));
+				$token->setToken(Uuid::V1_MAC);
+				$token->setUser($user);
+
+				$this->getDoctrine()->getManager()->persist($token);
+				$this->getDoctrine()->getManager()->flush();
+
 				$response->setStatusCode(Response::HTTP_CREATED);
-				$response->setContent(json_encode([
+				$response->setData([
 					"id" => $user->getId(),
 					"token" => $token->getToken(),
-				]));
+				]);
 			} else {
 				$response->setStatusCode(Response::HTTP_CONFLICT);
 			}
-		} else if (RequestUtils::checkPOST($request, array('passcode', 'challenge', 'machine_name', 'publickey'))) {
+		} else if ($request->getMethod() == 'POST' && !empty($request->get('passcode'))
+			&& !empty($request->get('machine_name')) && !empty($request->get('challenge'))) {
 
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
 
-			if(!is_null($this->getDoctrine()->getRepository(User::class)->log_with_challenge($request->query->get('passcode'), $request->query->get('challenge')))) {
+			if(!is_null($this->getDoctrine()->getRepository(User::class)->findAllByPass($request->get('passcode'), $request->get('challenge')))) {
 				$user = $this->getDoctrine()->getRepository(User::class)
-					->log_with_challenge($request->query->get('passcode'));
+					->findAllByPass($request->get('passcode'), $request->get('challenge'));
 
-				$token->setIP($request->query->getClientIp());
-				$token->setMachineName($request->query->get('machine_name'));
+				$user = $user[0];
+
+				$token->setIP($request->getClientIp());
+				$token->setMachineName($request->get('machine_name'));
 				$token->setLastUpdateTS(new \DateTime(date('Y-m-d H:i:s')));
 
-				$group = $this->getDoctrine()->getRepository(Group::class)->findBy([
+				$groups = $this->getDoctrine()->getRepository(Directory::class)->findBy([
 					'user' => $user,
 				]);
 
@@ -76,42 +85,31 @@ class UserController extends Controller
 					'user' => $user,
 				]);
 
-				$groupArray   = array();
-				$elementArray = array();
-
-				foreach ($group as $g){
-					array_push($groupArray, $g);
-				}
-
-				foreach ($elements as $e){
-					array_push($elementArray, $e);
-				}
-
 				$response->setStatusCode(Response::HTTP_OK);
-				$response->setContent([
+				$response->setData([
 					"id" => $user->getID(),
 					"username" => $user->getUsername(),
 					"email" => $user->getEmail(),
 					"isAdmin" => $user->isAdmin(),
 					"token" => $token->getToken(),
 					"data" => [
-						"groups" => $groupArray,
-						"elements" => $elementArray,
+						"groups" => $groups,
+						"elements" => $elements,
 					],
 				]);
 			}
-		} else if (RequestUtils::checkGET($request, ['limit', 'offset'])){
+		} else if ($request->getMethod() == 'GET' && !empty($request->get('limit')) && !empty($request->get('offset'))){
 
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
 			$current_token = $this->getDoctrine()->getRepository(Token::class)->findOneBy([
-				'token' => $request->headers->get('token')
+				'token' => $request->headers->get('X-ALOHOMORA-TOKEN')
 			]);
 
 			if($current_token->getUser()->isAdmin()){
 
 				$users = $this->getDoctrine()->getRepository(User::class)->findBy([
 
-				], null, $request->query->get('limit'), $request->query->get('offset'));
+				], null, $request->get('limit'), $request->get('offset'));
 
 				$response->setStatusCode(Response::HTTP_OK);
 				$response->setData([
@@ -120,36 +118,39 @@ class UserController extends Controller
 
 			}
 
-		} else if (RequestUtils::checkPATCH($request, ['id', 'username', 'email', 'isAdmin', 'password'])){
+		} else if ($request->getMethod() == 'PATCH'
+			&& !empty($request->get('id')) && !empty($request->get('username'))
+			&& !empty($request->get('email')) && !empty($request->get('isAdmin'))
+			&& !empty($request->get('password'))){
 
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
 			$current_token = $this->getDoctrine()->getRepository(Token::class)->findOneBy([
-				'token' => $request->headers->get('token')
+				'token' => $request->headers->get('X-ALOHOMORA-TOKEN')
 			]);
 
 			if($current_token->getUser()->isAdmin()){
 
-				$user = $this->getDoctrine()->getRepository(User::class)->find($request->query->get('id'));
+				$user = $this->getDoctrine()->getRepository(User::class)->find($request->get('id'));
 
-				$user->setUsername($request->query->get('username'))
-					->setEmail($request->query->get('email'))
-					->setAdmin($request->query->get('isAdmin'))
-					->setPassword($request->query->get('password'));
+				$user->setUsername($request->get('username'))
+					->setEmail($request->get('email'))
+					->setAdmin($request->get('isAdmin'))
+					->setPassword($request->get('password'));
 
 				$response->setStatusCode(Response::HTTP_OK);
 
 			}
 
-		} else if (RequestUtils::checkDELETE($request, ['id'])){
+		} else if ($request->getMethod() == 'DELETE' && !empty($request->get('id'))){
 
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
 			$current_token = $this->getDoctrine()->getRepository(Token::class)->findOneBy([
-				'token' => $request->headers->get('token')
+				'token' => $request->headers->get('X-ALOHOMORA-TOKEN')
 			]);
 
-			if($current_token->getUser()->isAdmin() || $current_token->getUser()->getID() == $request->query->get('id')){
+			if($current_token->getUser()->isAdmin() || $current_token->getUser()->getID() == $request->get('id')){
 
-				$user = $this->getDoctrine()->getRepository(User::class)->find($request->query->get('id'));
+				$user = $this->getDoctrine()->getRepository(User::class)->find($request->get('id'));
 
 				$this->getDoctrine()->getManager()->remove($user);
 				$this->getDoctrine()->getManager()->flush();

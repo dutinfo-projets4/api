@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Directory;
 use App\Entity\Element;
-use App\Entity\Group;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -19,13 +19,13 @@ class ElementController extends Controller
 		$request = Request::createFromGlobals();
 		$response = new Response();
 		$response->setStatusCode(Response::HTTP_BAD_REQUEST);
-		if($request->query->getMethod() == 'POST'){
+		if($request->getMethod() == 'POST'){
 
 			if(!empty($request->query->get('parent_grp')) && !empty($request->query->get('content'))){
 				$response->headers->set('Content-Type', 'application/json');
 
 				$element = new Element();
-				$group = $this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp'));
+				$group = $this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('parent_grp'));
 
 				$element->setContent($request->query->get('content'));
 				$element->setGroup($group);

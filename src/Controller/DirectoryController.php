@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Directory;
 use App\Entity\Element;
-use App\Entity\Group;
 use App\Entity\User;
 use App\Utils\RequestUtils;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,10 +12,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-class GroupController extends Controller {
+class DirectoryController extends Controller {
 
 	/**
-	 * @Route("/group", name="group")
+	 * @Route("/directory", name="directory")
 	 */
 	public function index() {
 		$request  = Request::createFromGlobals();
@@ -26,18 +26,19 @@ class GroupController extends Controller {
 			'token' => $request->headers->get('token'),
 		]);
 
-		if (RequestUtils::checkPOST($request, array('parent_grp', 'content', 'name'))){
+		if ($request->getMethod() == 'POST' && !empty($request->get('parent_grp')) && !empty($request->get('content'))
+			&& !empty($request->get('name'))){
 
-			$group = new Group();
+			$group = new Directory();
 
-			if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp')))
+			if(!is_null($this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('parent_grp')))
 			&& !is_null($current_token->getUser())){
 
-				$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp'));
+				$parent = $this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('parent_grp'));
 				$user = $current_token->getUser();
 
 				$group->setContent($request->query->get('content'));
-				$group->setParentGroup($parent);
+				$group->setParentDirectory($parent);
 				$group->setName($request->query->get('name'));
 				$group->setUser($user);
 
@@ -51,25 +52,26 @@ class GroupController extends Controller {
 
 			}
 
-		} else if (RequestUtils::checkPUT($request, array('parent_grp', 'id', 'name', 'content'))){
+		} else if ($request->getMethod() == 'PUT' && !empty($request->get('parent_grp')) && !empty($request->get('id'))
+			&& !empty($request->get('name')) && !empty($request->get('content'))){
 
 			$response->setStatusCode(Response::HTTP_NOT_FOUND);
 
-			if(!is_null($this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp')))
+			if(!is_null($this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('parent_grp')))
 				&& !is_null($current_token->getUser())){
 
 
-				$parent = $this->getDoctrine()->getRepository(Group::class)->find($request->query->get('parent_grp'));
+				$parent = $this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('parent_grp'));
 				$user = $current_token->getUser();
 
-				$group = $this->getDoctrine()->getRepository(Group::class)->findOneBy([
+				$group = $this->getDoctrine()->getRepository(Directory::class)->findOneBy([
 					'user' => $user,
 					'parent' => $parent,
 					'id' => $request->headers->get('id'),
 				]);
 
 				$group->setContent($request->query->get('content'));
-				$group->setParentGroup($parent);
+				$group->setParentDirectory($parent);
 				$group->setName($request->query->get('name'));
 				$group->setUser($user);
 
@@ -80,13 +82,13 @@ class GroupController extends Controller {
 
 			}
 
-		} else if (RequestUtils::checkDELETE($request, array('id'))){
+		} else if ($request->getMethod() == 'DELETE' && !empty($request->get('id'))){
 
 			$response->setStatusCode(Response::HTTP_NOT_FOUND);
 
-			if(!empty($this->getDoctrine()->getRepository(Group::class)->find($request->query->get('id')))){
+			if(!empty($this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('id')))){
 
-				$group = $this->getDoctrine()->getRepository(Group::class)->find($request->query->get('id'));
+				$group = $this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('id'));
 
 				$elements = $this->getDoctrine()->getRepository(Element::class)->findBy([
 					'group' => $group,

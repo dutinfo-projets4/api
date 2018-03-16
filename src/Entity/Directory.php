@@ -5,9 +5,9 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\GroupRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\DirectoryRepository")
  */
-class Group {
+class Directory {
 	/**
 	 * @ORM\Id
 	 * @ORM\GeneratedValue
@@ -32,22 +32,22 @@ class Group {
 
 	/**
 	 * Sub-group for the current group
-	 * @ORM\OneToMany(targetEntity="App\Entity\Group", mappedBy="group")
+	 * @ORM\OneToMany(targetEntity="App\Entity\Directory", mappedBy="directory")
 	 */
 	private $groups;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Element", mappedBy="group")
-     */
-    private $elements;
+	/**
+	 * @ORM\OneToMany(targetEntity="App\Entity\Element", mappedBy="directory")
+	 */
+	private $elements;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="group")
+	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="directory")
 	 */
 	private $user;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="App\Entity\Group", inversedBy="group")
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Directory", inversedBy="directory")
 	 */
 	private $parent;
 
@@ -100,37 +100,37 @@ class Group {
 		return $this->elements;
 	}
 
-    /**
-     * @return Array<Group>
-     */
-    public function getGroups()
-    {
-        return $this->groups;
-    }
+	/**
+	 * @return Array<Group>
+	 */
+	public function getGroups()
+	{
+		return $this->groups;
+	}
 
-    /**
-     * @param Array<Group>
-     */
-    public function setGroups($groups): void
-    {
-        $this->groups = $groups;
-    }
+	/**
+	 * @param Array<Group>
+	 */
+	public function setGroups($groups): void
+	{
+		$this->groups = $groups;
+	}
 
-    /**
-     * @return User isntance
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
+	/**
+	 * @return User isntance
+	 */
+	public function getUser()
+	{
+		return $this->user;
+	}
 
-    /**
-     * @param User instance
-     */
-    public function setUser($user): void
-    {
-        $this->user = $user;
-    }
+	/**
+	 * @param User instance
+	 */
+	public function setUser($user): void
+	{
+		$this->user = $user;
+	}
 
 	/**
 	 * @return Group instance
@@ -166,14 +166,14 @@ class Group {
 
 
 
-    public function toArray()
-    {
-    	return [
-		    "id" => $this->getID(),
-    		"parent" => $this->getParentGroup(),
-    		"content" => $this->getContent(),
-	    ];
-    }
+	public function toArray()
+	{
+		return [
+			"id" => $this->getID(),
+			"parent" => $this->getParentGroup(),
+			"content" => $this->getContent(),
+		];
+	}
 
 
 	/**

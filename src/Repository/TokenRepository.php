@@ -12,10 +12,23 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method Token[]    findAll()
  * @method Token[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TokenRepository extends ServiceEntityRepository {
+class TokenRepository extends ServiceEntityRepository
+{
+    public function __construct(RegistryInterface $registry)
+    {
+        parent::__construct($registry, Token::class);
+    }
 
-	public function __construct(RegistryInterface $registry) {
-		parent::__construct($registry, Token::class);
-	}
-
+    /*
+    public function findBySomething($value)
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.something = :value')->setParameter('value', $value)
+            ->orderBy('t.id', 'ASC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+    */
 }

@@ -32,7 +32,7 @@ class Element {
 	private $user;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="App\Entity\Group", inversedBy="elements")
+	 * @ORM\ManyToOne(targetEntity="App\Entity\Directory", inversedBy="elements")
 	 */
 	private $group;
 
@@ -96,7 +96,7 @@ class Element {
 	}
 
 	/**
-	 * @return Group
+	 * @return Directory
 	 */
 	public function getGroup()
 	{
@@ -104,10 +104,11 @@ class Element {
 	}
 
 	/**
-	 * @param Group $group
+	 * @param Directory $group
 	 */
 	public function setGroup($group): void {
 		$this->group = $group;
 	}
+
 
 }

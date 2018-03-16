@@ -39,7 +39,7 @@ class Config
 	/**
 	 * @return integer
 	 */
-	public function getId()
+	public function getID()
 	{
 		return $this->id;
 	}
@@ -47,7 +47,7 @@ class Config
 	/**
 	 * @param integer $id
 	 */
-	public function setId($id): void
+	public function setID($id): void
 	{
 		$this->id = $id;
 	}

@@ -23,7 +23,7 @@ class TokenController extends Controller
     	$response = new JsonResponse();
     	$response->setStatusCode(Response::HTTP_BAD_REQUEST);
 
-	    if(RequestUtils::checkGET($request, [])){
+	    if($request->getMethod() == 'GET'){
 
 			$current_token = $this->getDoctrine()->getRepository(Token::class)->findOneBy([
 				'token' => $request->headers->get('token'),
@@ -34,7 +34,7 @@ class TokenController extends Controller
 			]);
 
 	    }
-	    elseif(RequestUtils::checkDELETE($request, ['id'])){
+	    elseif($request->getMethod() == 'DELETE'){
 
 	    	$response->setStatusCode(Response::HTTP_FORBIDDEN);
 
@@ -54,7 +54,7 @@ class TokenController extends Controller
 			}
 
 	    }
-	    elseif(RequestUtils::checkPUT($request, [])){
+	    elseif($request->getMethod() == 'PUT'){
 
 		    $response->setStatusCode(Response::HTTP_FORBIDDEN);
 

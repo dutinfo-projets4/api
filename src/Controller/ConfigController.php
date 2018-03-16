@@ -22,7 +22,7 @@ class ConfigController extends Controller
     	$response = new JsonResponse();
     	$response->setStatusCode(Response::HTTP_FORBIDDEN);
 
-        if(RequestUtils::checkGET($request, [])){
+        if($request->getMethod() == 'GET'){
 
 	        $user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token'));
 
@@ -41,7 +41,9 @@ class ConfigController extends Controller
 	        }
 
         }
-        elseif (RequestUtils::checkPUT($request, ['register_captcha', 'limit_update', 'public_register', 'api_registering'])){
+        elseif ($request->getMethod() == 'PUT' && !empty($request->get('register_captcha'))
+	        && !empty($request->get('limit_update')) && !empty($request->get('public_register'))
+	        && !empty($request->get('api_registering'))){
 
 	        $user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token'));
 
@@ -49,10 +51,10 @@ class ConfigController extends Controller
 
 		        $config = new Config();
 
-		        $config->setCaptcha($request->query->get('register_captcha'))
-			        ->setLimit($request->query->get('limit_update'))
-			        ->setPublic($request->query->get('public_register'))
-			        ->setApi($request->query->get('api_registering'));
+		        $config->setCaptcha($request->query->get('register_captcha'));
+		        $config->setLimit($request->query->get('limit_update'));
+		        $config->setPublic($request->query->get('public_register'));
+		        $config->setApi($request->query->get('api_registering'));
 
 		        $this->getDoctrine()->getManager()->persist($config);
 		        $this->getDoctrine()->getManager()->flush();
