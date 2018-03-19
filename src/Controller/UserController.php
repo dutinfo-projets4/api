@@ -38,7 +38,7 @@ class UserController extends Controller
 				$user = new User();
 
 				$user->setEmail($request->get('email'));
-				$user->setPassword($request->get('password'));
+				$user->setPassword(hash('sha512', $request->get('password')));
 				$user->setUsername($request->get('username'));
 				$user->setAdmin(0);
 

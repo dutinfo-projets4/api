@@ -29,7 +29,7 @@ class UserRepository extends ServiceEntityRepository
 		return $this->getEntityManager()->createQuery(
 			'SELECT u 
 				  FROM App\Entity\User u 
-				  WHERE SHA2(CONCAT(SHA2(u.username,512), :challenge, SHA2(u.password,512)),512) = :pass'
+				  WHERE SHA2(CONCAT(SHA2(u.username,512), :challenge, u.password),512) = :pass'
 		)
 			->setParameter('challenge', $challenge)
 			->setParameter('pass', $pass)
