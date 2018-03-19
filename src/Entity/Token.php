@@ -41,6 +41,11 @@ class Token {
 	private $lastUpdateTS;
 
 	/**
+	 * @ORM\Column(type="string", length=1024)
+	 */
+	private $publicKey;
+
+	/**
 	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="tokens")
 	 */
 	private $user;
@@ -128,6 +133,22 @@ class Token {
 	 */
 	public function setLastUpdateTS($lastUpdateTS): void {
 		$this->lastUpdateTS = $lastUpdateTS;
+	}
+
+	/**
+	 * @return String publickKey
+	 */
+	public function getPublicKey()
+	{
+		return $this->publicKey;
+	}
+
+	/**
+	 * @param String $publicKey
+	 */
+	public function setPublicKey($publicKey): void
+	{
+		$this->publicKey = $publicKey;
 	}
 
 	/**
