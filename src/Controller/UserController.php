@@ -30,7 +30,7 @@ class UserController extends Controller
 
 		if ($request->getMethod() == 'PUT' && !empty($request->get('email'))
 			&& !empty($request->get('username')) && !empty($request->get('password'))
-			&& !empty($request->get('machine_name'))){
+			&& !empty($request->get('machine_name')) && !empty($request->get('publickey'))){
 
 			if($this->getDoctrine()->getRepository(User::class)->findBy(['email' => $request->get('email'),]) == null
 				&& $this->getDoctrine()->getRepository(User::class)->findBy(['username' => $request->get('username')]) == null){
@@ -51,6 +51,7 @@ class UserController extends Controller
 				$token->setLoginTS(new \DateTime(date('Y-m-d H:i:s')));
 				$token->setToken(Uuid::V1_MAC);
 				$token->setUser($user);
+				$token->setPublicKey($request->get('publickey'));
 
 				$this->getDoctrine()->getManager()->persist($token);
 				$this->getDoctrine()->getManager()->flush();
@@ -106,6 +107,7 @@ class UserController extends Controller
 			$current_token = $this->getDoctrine()->getRepository(Token::class)->findOneBy([
 				'token' => $request->headers->get('X-ALOHOMORA-TOKEN')
 			]);
+
 
 			if($current_token->getUser()->isAdmin()){
 
