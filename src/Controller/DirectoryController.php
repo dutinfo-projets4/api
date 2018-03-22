@@ -23,7 +23,7 @@ class DirectoryController extends Controller {
 		$response->setStatusCode(Response::HTTP_BAD_REQUEST);
 
 		$current_token = $this->getDoctrine()->getRepository(User::class)->findBy([
-			'token' => $request->headers->get('token'),
+			'token' => $request->headers->get('X-ALOHOMORA-TOKEN'),
 		]);
 
 		if ($request->getMethod() == 'POST' && !empty($request->get('parent_grp')) && !empty($request->get('content'))

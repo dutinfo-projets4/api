@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Config;
+use App\Entity\Token;
 use App\Entity\User;
 use App\Utils\RequestUtils;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,9 +25,11 @@ class ConfigController extends Controller
 
         if($request->getMethod() == 'GET'){
 
-	        $user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token'));
+	        $current_token = $this->getDoctrine()->getRepository(Token::class)->findBy([
+	        	'token' => $request->headers->get('token'),
+	        ]);
 
-	        if($user->isAdmin()){
+	        if($current_token->getUser()->isAdmin()){
 
 		        $config = $this->getDoctrine()->getRepository(Config::class)->find(1);
 
@@ -45,9 +48,11 @@ class ConfigController extends Controller
 	        && !empty($request->get('limit_update')) && !empty($request->get('public_register'))
 	        && !empty($request->get('api_registering'))){
 
-	        $user = $this->getDoctrine()->getRepository(User::class)->find($request->headers->get('token'));
+	        $current_token = $this->getDoctrine()->getRepository(Token::class)->findBy([
+		        'token' => $request->headers->get('token'),
+	        ]);
 
-	        if($user->isAdmin()){
+	        if($current_token->getUser()->isAdmin()){
 
 		        $config = new Config();
 
