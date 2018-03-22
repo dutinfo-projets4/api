@@ -72,7 +72,7 @@ class UserController extends Controller
 
 			if(!is_null($this->getDoctrine()->getRepository(User::class)->findAllByPass($request->get('passcode'), $challenge->getChallenge()))) {
 				$user = $this->getDoctrine()->getRepository(User::class)
-					->findAllByPass($request->get('passcode'), $request->get('challenge'));
+					->findAllByPass($request->get('passcode'), $challenge->getChallenge());
 
 				$user = $user[0];
 
