@@ -50,6 +50,17 @@ class Token {
 	 */
 	private $user;
 
+
+	public function __construct($user, $req) {
+		$this->user         = $user;
+		$this->token        = 1; // @TODO : Réparer le token !!
+		$this->machineName  = $req->get('machine_name');
+		$this->ip           = $req->getClientIp();
+		$this->publicKey    = $req->get('publickey');
+		$this->lastUpdateTS = new \DateTime();
+		$this->loginTS      = new \DateTime();
+	}
+
 	/**
 	 * @return int Identifier for the token
 	 */

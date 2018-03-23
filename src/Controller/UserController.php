@@ -26,7 +26,6 @@ class UserController extends Controller
 		$request = Request::createFromGlobals();
 		$response = new JsonResponse();
 		$response->setStatusCode(Response::HTTP_BAD_REQUEST);
-		$token = new Token();
 
 		if ($request->getMethod() == 'PUT' && !empty($request->get('email'))
 			&& !empty($request->get('username')) && !empty($request->get('password'))
@@ -35,26 +34,13 @@ class UserController extends Controller
 			if($this->getDoctrine()->getRepository(User::class)->findBy(['email' => $request->get('email'),]) == null
 				&& $this->getDoctrine()->getRepository(User::class)->findBy(['username' => $request->get('username')]) == null){
 
-				$user = new User();
-
-				$user->setEmail($request->get('email'));
-				$user->setPassword(hash('sha512', $request->get('password')));
-				$user->setUsername($request->get('username'));
-				$user->setAdmin(0);
+				$user  = new User($request);
+				$token = new Token($user, $request);
 
 				$this->getDoctrine()->getManager()->persist($user);
-				$this->getDoctrine()->getManager()->flush();
-
-				$token->setIP($request->getClientIp());
-				$token->setMachineName($request->get('machine_name'));
-				$token->setLastUpdateTS(new \DateTime(date('Y-m-d H:i:s')));
-				$token->setLoginTS(new \DateTime(date('Y-m-d H:i:s')));
-				$token->setToken(Uuid::V1_MAC);
-				$token->setUser($user);
-				$token->setPublicKey($request->get('publickey'));
-
 				$this->getDoctrine()->getManager()->persist($token);
 				$this->getDoctrine()->getManager()->flush();
+
 
 				$response->setStatusCode(Response::HTTP_CREATED);
 				$response->setData([
@@ -66,40 +52,43 @@ class UserController extends Controller
 			}
 		} else if ($request->getMethod() == 'POST' && !empty($request->get('passcode'))
 			&& !empty($request->get('machine_name')) && !empty($request->get('challenge'))) {
-
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
 			$challenge = $this->getDoctrine()->getRepository(Challenge::class)->find($request->get('challenge'));
+
+			var_dump($challenge->getChallenge());
 
 			if(!is_null($this->getDoctrine()->getRepository(User::class)->findAllByPass($request->get('passcode'), $challenge->getChallenge()))) {
 				$user = $this->getDoctrine()->getRepository(User::class)
 					->findAllByPass($request->get('passcode'), $challenge->getChallenge());
 
-				$user = $user[0];
+				if (count($user) > 0) {
+					$user = $user[0];
 
-				$token->setIP($request->getClientIp());
-				$token->setMachineName($request->get('machine_name'));
-				$token->setLastUpdateTS(new \DateTime(date('Y-m-d H:i:s')));
+					$token->setIP($request->getClientIp());
+					$token->setMachineName($request->get('machine_name'));
+					$token->setLastUpdateTS(new \DateTime(date('Y-m-d H:i:s')));
 
-				$groups = $this->getDoctrine()->getRepository(Directory::class)->findBy([
-					'user' => $user,
-				]);
+					$groups = $this->getDoctrine()->getRepository(Directory::class)->findBy([
+						'user' => $user,
+					]);
 
-				$elements = $this->getDoctrine()->getRepository(Element::class)->findBy([
-					'user' => $user,
-				]);
+					$elements = $this->getDoctrine()->getRepository(Element::class)->findBy([
+						'user' => $user,
+					]);
 
-				$response->setStatusCode(Response::HTTP_OK);
-				$response->setData([
-					"id" => $user->getID(),
-					"username" => $user->getUsername(),
-					"email" => $user->getEmail(),
-					"isAdmin" => $user->isAdmin(),
-					"token" => $token->getToken(),
-					"data" => [
-						"groups" => $groups,
-						"elements" => $elements,
-					],
-				]);
+					$response->setStatusCode(Response::HTTP_OK);
+					$response->setData([
+						"id" => $user->getID(),
+						"username" => $user->getUsername(),
+						"email" => $user->getEmail(),
+						"isAdmin" => $user->isAdmin(),
+						"token" => $token->getToken(),
+						"data" => [
+							"groups" => $groups,
+							"elements" => $elements,
+						],
+					]);
+				}
 			}
 		} else if ($request->getMethod() == 'GET' && !empty($request->get('limit')) && !empty($request->get('offset'))){
 

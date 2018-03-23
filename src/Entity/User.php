@@ -50,6 +50,13 @@ class User {
 	 */
 	private $tokens;
 
+	public function __construct($request) {
+		$this->username = $request->get('username');
+		$this->email    = $request->get('email');
+		$this->password = hash('sha512', $request->get('password'));
+		$this->isAdmin  = false;
+	}
+
 	/**
 	 * @return int Identifier for the user
 	 */

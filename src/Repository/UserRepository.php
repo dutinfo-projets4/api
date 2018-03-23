@@ -26,7 +26,7 @@ class UserRepository extends ServiceEntityRepository
 	 */
 	public function findAllByPass($pass, $challenge) :array
 	{
-		return $this->getEntityManager()->createQuery(
+		/*return $this->getEntityManager()->createQuery(
 			'SELECT u 
 				  FROM App\Entity\User u 
 				  WHERE SHA2(CONCAT(SHA2(u.username,512), :challenge, u.password),512) = :pass'
@@ -34,7 +34,16 @@ class UserRepository extends ServiceEntityRepository
 			->setParameter('challenge', $challenge)
 			->setParameter('pass', $pass)
 			->setMaxResults(1)
-			->execute();
+			->execute();*/
+		$rq = $this->getEntityManager()->createQuery(<<<SQL
+			SELECT SHA2(CONCAT(SHA2(u.username,512), :challenge, u.password),512)
+			FROM App\Entity\User u
+SQL
+)->setParameter('challenge', $challenge)->execute();
+
+		var_dump($rq);
+
+		return NULL;
 	}
 
 	/*
