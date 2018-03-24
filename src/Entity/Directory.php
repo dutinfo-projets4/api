@@ -16,11 +16,6 @@ class Directory {
 	private $id;
 
 	/**
-	 * @ORM\Column(type="string", length=255)
-	 */
-	private $name;
-
-	/**
 	 * @ORM\Column(type="text")
 	 */
 	private $content;
@@ -135,8 +130,7 @@ class Directory {
 	/**
 	 * @return Group instance
 	 */
-	public function getParentGroup()
-	{
+	public function getParentGroup() {
 		return $this->parent;
 	}
 
@@ -166,13 +160,13 @@ class Directory {
 
 
 
-	public function toArray()
-	{
-		return [
+	public function asArray() {
+		$parent = $this->parent == null ? -1 : $this->parent->getID();
+		return array(
 			"id" => $this->getID(),
-			"parent" => $this->getParentGroup(),
-			"content" => $this->getContent(),
-		];
+			"parent" => $parent,
+			"content" => $this->content
+		);
 	}
 
 

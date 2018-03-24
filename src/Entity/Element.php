@@ -110,5 +110,13 @@ class Element {
 		$this->group = $group;
 	}
 
+	public function asArray() : array {
+		$prt = $this->group == null ? -1 : $this->group->getID();
+		return array(
+			"id" => $this->id,
+			"parent" => $prt,
+			"content" => $this->content
+		);
+	}
 
 }

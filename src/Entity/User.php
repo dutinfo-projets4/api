@@ -96,7 +96,7 @@ class User {
 	 * @param string $password
 	 */
 	public function setPassword($password): void {
-		$this->password = $password;
+		$this->password = hash('sha512', $password);
 	}
 
 	/**

@@ -16,25 +16,25 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Validator\Constraints\Uuid;
 
-class UserController extends Controller
-{
+class UserController extends Controller {
+
 	/**
 	 * @Route("/users", name="user")
 	 */
-	public function index()
-	{
+	public function index() {
 		$request = Request::createFromGlobals();
 		$doctrine = $this->getDoctrine();
 		$response = new JsonResponse();
 		$response->setStatusCode(Response::HTTP_BAD_REQUEST);
 
-		if ($request->getMethod() == 'PUT' && !empty($request->get('email'))
-			&& !empty($request->get('username')) && !empty($request->get('password'))
-			&& !empty($request->get('machine_name')) && !empty($request->get('publickey'))){
+		// If the method is PUT, Registering the user
+		if (RequestUtils::checkPUT($request, array('username', 'email', 'password', 'machine_name', 'public_key'))) {
+			// Checks if the email or the username is already in the database
+			$isRegistredEmail = count($doctrine->getRepository(User::class)->findByEmail($request->get('email')));
+			$isRegistredUname = count($doctrine->getRepository(User::class)->findByUsername($request->get('username')));
 
-			if($doctrine->getRepository(User::class)->findBy(['email' => $request->get('email'),]) == null
-				&& $doctrine->getRepository(User::class)->findBy(['username' => $request->get('username')]) == null){
-
+			// If not, the used is allowed to register
+			if($isRegistredEmail == 0 && $isRegistredUname == 0){
 				$user  = new User($request);
 				$token = new Token($user, $request);
 
@@ -42,30 +42,34 @@ class UserController extends Controller
 				$doctrine->getManager()->persist($token);
 				$doctrine->getManager()->flush();
 
-
 				$response->setStatusCode(Response::HTTP_CREATED);
 				$response->setData([
 					"id" => $user->getId(),
 					"token" => $token->getToken(),
 				]);
 			} else {
+				// If so, the user gets a 409 error
 				$response->setStatusCode(Response::HTTP_CONFLICT);
 			}
-		} else if ($request->getMethod() == 'POST' && !empty($request->get('passcode'))
-			&& !empty($request->get('machine_name')) && !empty($request->get('challenge'))) {
+		// If the method is POST, Login-in the user
+		} else if (RequestUtils::checkPOST($request, array('passcode', 'challenge', 'machine_name', 'public_key'))) {
 
+			// Getting the challenge that the user is using
 			$challenge = $doctrine->getRepository(Challenge::class)->find($request->get('challenge'));
 			if ($challenge == null) return $response;
 
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
-
 			$userRepository = $doctrine->getRepository(User::class);
-
 			$user = $userRepository->findAllByPass($request->get('passcode'), $challenge->getChallenge());
-			if (count($user) > 0) {
-				$user = $user[0];
-				$token = new Token($user, $request);
 
+			// The user is found, processing it
+			if (count($user) > 0) {
+				$user              = $user[0];
+				$token             = new Token($user, $request);
+				$groupsFormatted   = array();
+				$elementsFormatted = array();
+
+				// Getting all his groups and elements
 				$groups = $doctrine->getRepository(Directory::class)->findBy([
 					'user' => $user,
 				]);
@@ -74,6 +78,16 @@ class UserController extends Controller
 					'user' => $user,
 				]);
 
+				// Parsing them as array to be send through the JsonResponse
+				foreach($groups as $grp) {
+					array_push($groupsFormatted, $grp->asArray());
+				}
+
+				foreach($elements as $elt) {
+					array_push($elementsFormatted, $elt->asArray());
+				}
+
+				// Sending the request
 				$response->setStatusCode(Response::HTTP_OK);
 				$response->setData([
 					"id" => $user->getID(),
@@ -82,12 +96,12 @@ class UserController extends Controller
 					"isAdmin" => $user->isAdmin(),
 					"token" => $token->getToken(),
 					"data" => [
-						"groups" => $groups,
-						"elements" => $elements,
+						"groups" => $groupsFormatted,
+						"elements" => $elementsFormatted,
 					],
 				]);
 			}
-		} else if ($request->getMethod() == 'GET' && !empty($request->get('limit')) && !empty($request->get('offset'))){
+		} else if (RequestUtils::checkGET($request, array("limit", "offset"))){
 
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
 			$current_token = $this->getDoctrine()->getRepository(Token::class)->findOneBy([
@@ -108,28 +122,17 @@ class UserController extends Controller
 
 			}
 
-		} else if ($request->getMethod() == 'PATCH'
-			&& !empty($request->get('id')) && !empty($request->get('username'))
-			&& !empty($request->get('email')) && !empty($request->get('isAdmin'))
-			&& !empty($request->get('password'))){
-
+		} else if (RequestUtils::checkPATCH($request, array('id', 'username', 'email'))) {
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
-			$current_token = $this->getDoctrine()->getRepository(Token::class)->findOneBy([
-				'token' => $request->headers->get('X-ALOHOMORA-TOKEN')
-			]);
 
-			if($current_token->getUser()->isAdmin()){
+			$user = $this->getDoctrine()->getRepository(User::class)->find($request->get('id'));
 
-				$user = $this->getDoctrine()->getRepository(User::class)->find($request->get('id'));
+			$user->setUsername($request->get('username'))
+			     ->setEmail($request->get('email'))
+			     ->setAdmin($request->get('isAdmin'))
+			     ->setPassword($request->get('password'));
 
-				$user->setUsername($request->get('username'))
-					->setEmail($request->get('email'))
-					->setAdmin($request->get('isAdmin'))
-					->setPassword($request->get('password'));
-
-				$response->setStatusCode(Response::HTTP_OK);
-
-			}
+			$response->setStatusCode(Response::HTTP_OK);
 
 		} else if ($request->getMethod() == 'DELETE' && !empty($request->get('id'))){
 

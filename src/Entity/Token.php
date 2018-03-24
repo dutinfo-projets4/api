@@ -53,12 +53,25 @@ class Token {
 
 	public function __construct($user, $req) {
 		$this->user         = $user;
-		$this->token        = 1; // @TODO : Réparer le token !!
+		$this->token        = Token::uuid();
 		$this->machineName  = $req->get('machine_name');
 		$this->ip           = $req->getClientIp();
-		$this->publicKey    = $req->get('publickey');
+		$this->publicKey    = $req->get('public_key');
 		$this->lastUpdateTS = new \DateTime();
 		$this->loginTS      = new \DateTime();
+	}
+
+	/**
+	 * Thanks to https://stackoverflow.com/questions/2040240/php-function-to-generate-v4-uuid
+	 * random_bytes is cryptographically secure
+	 */
+	public static function uuid() {
+		$data = random_bytes(15);
+
+		$data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
+		$data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+
+		return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 	}
 
 	/**
