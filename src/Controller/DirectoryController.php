@@ -28,7 +28,6 @@ class DirectoryController extends Controller {
 		$token = LoginUtils::getToken($doctrine->getManager(), $request);
 
 		if ($token != null) {
-
 			if (RequestUtils::checkPOST($request, array('content'))) {
 
 				$parent = null;
@@ -48,70 +47,62 @@ class DirectoryController extends Controller {
 					'id' => $group->getID(),
 				]);
 
-			}
-			else if (RequestUtils::checkPUT($request, array('id', 'content')))
-			{
+			} else if (RequestUtils::checkPUT($request, array('id', 'content'))) {
 				$response->setStatusCode(Response::HTTP_NOT_FOUND);
 
 				$id = $request->get('id');
 				$content = $request->get('content');
 				$parent = $request->get('parent_grp');
 
-					$group = $doctrine->getRepository(Directory::class)->findOneBy([
-						'user' => $token->getUser(),
-						'id' => $id,
-					]);
+				$group = $doctrine->getRepository(Directory::class)->findOneBy([
+					'user' => $token->getUser(),
+					'id' => $id,
+				]);
 
-					if ($group != null) {
+				if ($group != null) {
 
-						if (!empty($parent) && $group->getParentGroup()->getID() != $parent) {
+					if (!empty($parent) && $group->getParentGroup()->getID() != $parent) {
 
-							$newParent = $doctrine->getRepository(Directory::class)->findOneBy([ 'id' => $parent]);
-							if ($newParent != null) {
-								$group->setParentGroup($newParent);
-							} else {
-								$response->setStatusCode(Response::HTTP_NOT_FOUND);
-								return $response;
-							}
-
+						$newParent = $doctrine->getRepository(Directory::class)->findOneBy(['id' => $parent]);
+						if ($newParent != null) {
+							$group->setParentGroup($newParent);
+						} else {
+							$response->setStatusCode(Response::HTTP_NOT_FOUND);
+							return $response;
 						}
 
-						$group->setContent($request->get('content'));
-						$group->setUser($token->getUser());
-
-						$this->getDoctrine()->getManager()->persist($group);
-						$this->getDoctrine()->getManager()->flush();
-
-						$response->setStatusCode(Response::HTTP_OK);
 					}
 
-				}
+					$group->setContent($request->get('content'));
+					$group->setUser($token->getUser());
 
-			} else if ($request->getMethod() == 'DELETE' && !empty($request->get('id'))) {
-
-				$response->setStatusCode(Response::HTTP_NOT_FOUND);
-
-				if (!empty($this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('id')))) {
-
-					$group = $this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('id'));
-
-					$elements = $this->getDoctrine()->getRepository(Element::class)->findBy([
-						'group' => $group,
-					]);
-
-					$this->getDoctrine()->getManager()->remove($group);
+					$this->getDoctrine()->getManager()->persist($group);
 					$this->getDoctrine()->getManager()->flush();
 
-					$response->setStatusCode(Response::HTTP_GONE);
-
-					$response->setData([
-						'deleted' => $elements,
-					]);
-
+					$response->setStatusCode(Response::HTTP_OK);
 				}
 
-			}
 
+			} else if (RequestUtils::checkDELETE($request, array('id'))) {
+				var_dump("Toto");
+				$response->setStatusCode(Response::HTTP_NOT_FOUND);
+
+				$group = $doctrine->getRepository(Directory::class)->findOneBy(['id' => $request->get('id')]);
+
+				if ($group != null) {
+					if ($group->getUser() == $token->getUser()) {
+						$this->getDoctrine()->getManager()->remove($group);
+						$this->getDoctrine()->getManager()->flush();
+
+						$response->setStatusCode(Response::HTTP_GONE);
+					} else {
+						$response->setStatusCode(Response::HTTP_FORBIDDEN);
+					}
+				}
+
+
+			}
+		}
 		return $response;
 	}
 }
