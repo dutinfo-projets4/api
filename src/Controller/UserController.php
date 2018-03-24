@@ -7,6 +7,7 @@ use App\Entity\Directory;
 use App\Entity\Element;
 use App\Entity\Token;
 use App\Entity\User;
+use App\Utils\LoginUtils;
 use App\Utils\RequestUtils;
 use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\HttpFoundation\Request;
@@ -107,17 +108,16 @@ class UserController extends Controller {
 			}
 		} else if (RequestUtils::checkGET($request, array("limit", "offset"))){
 
+			// Ne passe pas dedans car les paramètres GET ne sont pas dans $request (???)
+
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
-			$current_token = $this->getDoctrine()->getRepository(Token::class)->findOneBy([
-				'token' => $request->headers->get('X-ALOHOMORA-TOKEN')
-			]);
+			$token = LoginUtils::getToken($doctrine, $request);
 
+			if ($token != null){
+				if (!$token->getUser()->isAdmin())
+					return $response;
 
-			if($current_token->getUser()->isAdmin()){
-
-				$users = $this->getDoctrine()->getRepository(User::class)->findBy([
-
-				], null, $request->get('limit'), $request->get('offset'));
+				$users = $this->getDoctrine()->getRepository(User::class)->findBy([], null, $request->get('limit'), $request->get('offset'));
 
 				$response->setStatusCode(Response::HTTP_OK);
 				$response->setData([

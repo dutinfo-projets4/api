@@ -49,7 +49,7 @@ class ElementController extends Controller
 					'id' => $element->getID(),
 				]));
 
-			} elseif (RequestUtils::checkPUT($request, array('id', 'content'))) {
+			} else if (RequestUtils::checkPUT($request, array('id', 'content'))) {
 
 				$response->setStatusCode(Response::HTTP_NOT_FOUND);
 				$elt = $doctrine->getRepository(Element::class)->findOneBy([
@@ -73,7 +73,9 @@ class ElementController extends Controller
 					$response->setStatusCode(Response::HTTP_OK);
 				}
 
-			} elseif ($request->getMethod() == 'DELETE') {
+			} else if ($request->getMethod() == 'DELETE') {
+				// @TODO: Corriger le on delete à cascade pour que la suppression d'un element ne pose plus de pb
+				// @TODO: Same pour les groupes
 
 				if (!empty($request->query->get('id'))) {
 
