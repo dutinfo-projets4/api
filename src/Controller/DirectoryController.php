@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Directory;
 use App\Entity\Element;
 use App\Entity\User;
+use App\Utils\LoginUtils;
 use App\Utils\RequestUtils;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,18 +25,20 @@ class DirectoryController extends Controller {
 
 		$doctrine = $this->getDoctrine();
 
-		$current_token = $this->getDoctrine()->getRepository(User::class)->findBy([
-			'token' => $request->headers->get('X-ALOHOMORA-TOKEN'),
-		]);
+		$token = LoginUtils::getToken($doctrine->getManager(), $request);
 
-		if (RequestUtils::checkPOST($request, array('parent_grp', 'content'))){
+		if ($token != null) {
 
-			$parent = $doctrine->getRepository(Directory::class)->find($request->get('parent_grp'));
-			$user = $current_token->getUser();
+			if (RequestUtils::checkPOST($request, array('content'))) {
 
-			if($user != null){
+				$parent = null;
 
-				$group = new Directory($user, count($parent) > 0 ? $parent[0] : null, $request);
+				if ($request->get('parent_grp'))
+					$parent = $doctrine->getRepository(Directory::class)->find($request->get('parent_grp'));
+
+				$user = $token->getUser();
+
+				$group = new Directory($user, $parent != null ? $parent : null, $request);
 
 				$this->getDoctrine()->getManager()->persist($group);
 				$this->getDoctrine()->getManager()->flush();
@@ -46,61 +49,68 @@ class DirectoryController extends Controller {
 				]);
 
 			}
+			else if (RequestUtils::checkPUT($request, array('id', 'content')))
+			{
+				$response->setStatusCode(Response::HTTP_NOT_FOUND);
 
-		} else if ($request->getMethod() == 'PUT' && !empty($request->get('parent_grp')) && !empty($request->get('id'))
-			&& !empty($request->get('name')) && !empty($request->get('content'))){
+				$id = $request->get('id');
+				$content = $request->get('content');
+				$parent = $request->get('parent_grp');
 
-			$response->setStatusCode(Response::HTTP_NOT_FOUND);
+					$group = $doctrine->getRepository(Directory::class)->findOneBy([
+						'user' => $token->getUser(),
+						'id' => $id,
+					]);
 
-			if(!is_null($this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('parent_grp')))
-				&& !is_null($current_token->getUser())){
+					if ($group != null) {
 
+						if (!empty($parent) && $group->getParentGroup()->getID() != $parent) {
 
-				$parent = $this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('parent_grp'));
-				$user = $current_token->getUser();
+							$newParent = $doctrine->getRepository(Directory::class)->findOneBy([ 'id' => $parent]);
+							if ($newParent != null) {
+								$group->setParentGroup($newParent);
+							} else {
+								$response->setStatusCode(Response::HTTP_NOT_FOUND);
+								return $response;
+							}
 
-				$group = $this->getDoctrine()->getRepository(Directory::class)->findOneBy([
-					'user' => $user,
-					'parent' => $parent,
-					'id' => $request->headers->get('id'),
-				]);
+						}
 
-				$group->setContent($request->query->get('content'));
-				$group->setParentDirectory($parent);
-				$group->setName($request->query->get('name'));
-				$group->setUser($user);
+						$group->setContent($request->get('content'));
+						$group->setUser($token->getUser());
 
-				$this->getDoctrine()->getManager()->persist($group);
-				$this->getDoctrine()->getManager()->flush();
+						$this->getDoctrine()->getManager()->persist($group);
+						$this->getDoctrine()->getManager()->flush();
 
-				$response->setStatusCode(Response::HTTP_OK);
+						$response->setStatusCode(Response::HTTP_OK);
+					}
+
+				}
+
+			} else if ($request->getMethod() == 'DELETE' && !empty($request->get('id'))) {
+
+				$response->setStatusCode(Response::HTTP_NOT_FOUND);
+
+				if (!empty($this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('id')))) {
+
+					$group = $this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('id'));
+
+					$elements = $this->getDoctrine()->getRepository(Element::class)->findBy([
+						'group' => $group,
+					]);
+
+					$this->getDoctrine()->getManager()->remove($group);
+					$this->getDoctrine()->getManager()->flush();
+
+					$response->setStatusCode(Response::HTTP_GONE);
+
+					$response->setData([
+						'deleted' => $elements,
+					]);
+
+				}
 
 			}
-
-		} else if ($request->getMethod() == 'DELETE' && !empty($request->get('id'))){
-
-			$response->setStatusCode(Response::HTTP_NOT_FOUND);
-
-			if(!empty($this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('id')))){
-
-				$group = $this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('id'));
-
-				$elements = $this->getDoctrine()->getRepository(Element::class)->findBy([
-					'group' => $group,
-				]);
-
-				$this->getDoctrine()->getManager()->remove($group);
-				$this->getDoctrine()->getManager()->flush();
-
-				$response->setStatusCode(Response::HTTP_GONE);
-
-				$response->setData([
-					'deleted' => $elements,
-				]);
-
-			}
-
-		}
 
 		return $response;
 	}

@@ -50,6 +50,7 @@ class Directory {
 		$this->user = $user;
 		$this->content = $request->get('content');
 		$this->parent = $parent;
+		$this->lastUpdateTS = new \DateTime();
 	}
 
 	/**
