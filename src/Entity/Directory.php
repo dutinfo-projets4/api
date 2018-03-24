@@ -165,8 +165,6 @@ class Directory {
 		$this->content = $content;
 	}
 
-
-
 	public function asArray() {
 		$parent = $this->parent == null ? -1 : $this->parent->getID();
 		return array(
@@ -175,7 +173,6 @@ class Directory {
 			"content" => $this->content
 		);
 	}
-
 
 	/**
 	 * @TODO Add element

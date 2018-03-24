@@ -38,8 +38,6 @@ class RequestUtils {
 	}
 
 	private static function checkMethod(Request $rq, string $method, Array $param) {
-		var_dump($rq->getMethod());
-		var_dump($method);
 		if ($rq->getMethod() != $method)
 			return false;
 
