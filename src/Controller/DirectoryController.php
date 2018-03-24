@@ -22,25 +22,20 @@ class DirectoryController extends Controller {
 		$response = new JsonResponse();
 		$response->setStatusCode(Response::HTTP_BAD_REQUEST);
 
+		$doctrine = $this->getDoctrine();
+
 		$current_token = $this->getDoctrine()->getRepository(User::class)->findBy([
 			'token' => $request->headers->get('X-ALOHOMORA-TOKEN'),
 		]);
 
-		if ($request->getMethod() == 'POST' && !empty($request->get('parent_grp')) && !empty($request->get('content'))
-			&& !empty($request->get('name'))){
+		if (RequestUtils::checkPOST($request, array('parent_grp', 'content'))){
 
-			$group = new Directory();
+			$parent = $doctrine->getRepository(Directory::class)->find($request->get('parent_grp'));
+			$user = $current_token->getUser();
 
-			if(!is_null($this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('parent_grp')))
-			&& !is_null($current_token->getUser())){
+			if($user != null){
 
-				$parent = $this->getDoctrine()->getRepository(Directory::class)->find($request->query->get('parent_grp'));
-				$user = $current_token->getUser();
-
-				$group->setContent($request->query->get('content'));
-				$group->setParentDirectory($parent);
-				$group->setName($request->query->get('name'));
-				$group->setUser($user);
+				$group = new Directory($user, count($parent) > 0 ? $parent[0] : null, $request);
 
 				$this->getDoctrine()->getManager()->persist($group);
 				$this->getDoctrine()->getManager()->flush();

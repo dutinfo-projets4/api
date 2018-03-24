@@ -46,6 +46,12 @@ class Directory {
 	 */
 	private $parent;
 
+	public function __construct($user, $parent, $request){
+		$this->user = $user;
+		$this->content = $request->get('content');
+		$this->parent = $parent;
+	}
+
 	/**
 	 * @return int Identifier of the group
 	 */

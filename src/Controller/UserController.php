@@ -87,6 +87,10 @@ class UserController extends Controller {
 					array_push($elementsFormatted, $elt->asArray());
 				}
 
+				$doctrine->getManager()->persist($user);
+				$doctrine->getManager()->persist($token);
+				$doctrine->getManager()->flush();
+
 				// Sending the request
 				$response->setStatusCode(Response::HTTP_OK);
 				$response->setData([

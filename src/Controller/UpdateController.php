@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Directory;
 use App\Entity\Element;
 use App\Entity\User;
+use App\Entity\Token;
+use App\Utils\LoginUtils;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,36 +23,49 @@ class UpdateController extends Controller
 		$response = new JsonResponse();
 		$response->setStatusCode(Response::HTTP_BAD_REQUEST);
 
-		$current_token = $this->getDoctrine()->getRepository(User::class)->findBy([
-			'token' => $request->headers->get('token'),
-		]);
-		$user = $current_token->getUser();
+		$em = $this->getDoctrine()->getManager();
 
-		if(!is_null($user)) {
-			$group = $this->getDoctrine()->getRepository(Directory::class)->findBy([
-				'user' => $user,
-			]);
+		$token = LoginUtils::getToken($em, $request);
 
-			$elements = $this->getDoctrine()->getRepository(Element::class)->findBy([
-				'user' => $user,
-			]);
+		if ($token != null) {
 
-			$groupArray   = array();
-			$elementArray = array();
+				$token->setLastUpdateTS(new \DateTime());
+				$em->flush();
 
-			foreach ($group as $g){
-				array_push($groupArray, $g);
-			}
+				$user = $token->getUser();
 
-			foreach ($elements as $e){
-				array_push($elementArray, $e);
-			}
+				$group = $this->getDoctrine()->getRepository(Directory::class)->findBy([
+					'user' => $user
+				]);
 
-			$response->setStatusCode(Response::HTTP_OK);
-			$response->setContent([
-				"groups" => $groupArray,
-				"elements" => $elementArray,
-			]);
+				$elements = $this->getDoctrine()->getRepository(Element::class)->findBy([
+					'user' => $user
+				]);
+
+				$groupArray   = array();
+				$elementArray = array();
+
+				foreach ($group as $g){
+					// @TODO: Faire ça avec Doctrine
+					if ($token->getLastUpdateTS() < $g->getLastUpdateTS()) {
+						array_push($groupArray, $g->asArray());
+					}
+				}
+
+				foreach ($elements as $e){
+					// @TODO: Faire ça avec Doctrine
+					if ($token->getLastUpdateTS() < $e->getLastUpdateTS()) {
+						array_push($elementArray, $e->asArray());
+					}
+				}
+
+				$response->setStatusCode(Response::HTTP_OK);
+				$response->setData([
+					"groups" => $groupArray,
+					"elements" => $elementArray,
+				]);
+		} else {
+			$response->setStatusCode(Response::HTTP_FORBIDDEN);
 		}
 
 		return $response;
