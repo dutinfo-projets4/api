@@ -46,6 +46,11 @@ class Token {
 	private $publicKey;
 
 	/**
+	 * @ORM\Column(type="integer", options={"default": 0})
+	 */
+	private $requestID;
+
+	/**
 	 * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="tokens")
 	 */
 	private $user;
@@ -190,5 +195,12 @@ class Token {
 	}
 
 
+	public function getRequestID() {
+		return $this->requestID;
+	}
+
+	public function setRequestID($id) : void {
+		$this->requestID = $id;
+	}
 
 }
