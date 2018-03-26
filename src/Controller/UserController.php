@@ -7,6 +7,7 @@ use App\Entity\Directory;
 use App\Entity\Element;
 use App\Entity\Token;
 use App\Entity\User;
+use App\Repository\UserRepository;
 use App\Utils\LoginUtils;
 use App\Utils\RequestUtils;
 use phpDocumentor\Reflection\Types\Array_;
@@ -20,7 +21,7 @@ use Symfony\Component\Validator\Constraints\Uuid;
 class UserController extends Controller {
 
 	/**
-	 * @Route("/users", name="user")
+	 * @Route("/users", name="users")
 	 */
 	public function index() {
 		$request = Request::createFromGlobals();
@@ -60,6 +61,8 @@ class UserController extends Controller {
 			if ($challenge == null) return $response;
 
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
+
+			/** @var UserRepository $userRepository */
 			$userRepository = $doctrine->getRepository(User::class);
 			$user = $userRepository->findAllByPass($request->get('passcode'), $challenge->getChallenge());
 

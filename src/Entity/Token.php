@@ -64,6 +64,7 @@ class Token {
 		$this->publicKey    = $req->get('public_key');
 		$this->lastUpdateTS = new \DateTime();
 		$this->loginTS      = new \DateTime();
+		$this->requestID    = 0;
 	}
 
 	/**

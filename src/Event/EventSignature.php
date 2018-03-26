@@ -5,6 +5,7 @@ namespace App\Event;
 
 use App\Utils\LoginUtils;
 use Doctrine\ORM\EntityManager;
+use ErrorException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -68,12 +69,28 @@ class EventSignature {
 
 		// If the user is auth'ed and is valid
 		if ($token != null) {
-			$pubkey = $token->getPublicKey();
+			$pk = $token->getPublicKey();
+			$pubkey  = <<<RSA
+-----BEGIN PUBLIC KEY-----
+$pk
+-----END PUBLIC KEY-----
+RSA;
 
 			// Generate the data
-			$data = "";
+			$data = json_encode(array_merge($request->request->all(), $request->query->all()));
 
-			if (true/*openssl_verify($data, $signature, $pubkey)*/) {
+			var_dump($data);
+
+			$verif = 0;
+			try {
+				$verif = openssl_verify($data, base64_decode($signature), $pubkey);
+			} catch (ErrorException $e){
+				// If someone manages to get there, that mean he's in deep troubles
+				// His account is doomed
+				var_dump("Bad key");
+			}
+
+			if ($verif) {
 
 				// The request is allowed to be processed
 				if ($reqID > $token->getRequestID()) {
