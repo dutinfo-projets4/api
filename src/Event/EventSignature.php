@@ -80,6 +80,7 @@ RSA;
 			$data = json_encode(array_merge($request->request->all(), $request->query->all()));
 
 			var_dump($data);
+			var_dump($signature);
 
 			$verif = 0;
 			try {
