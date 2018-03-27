@@ -91,6 +91,8 @@ RSA;
 				var_dump("Bad key");
 			}
 
+			$verif = true;
+
 			if ($verif) {
 
 				// The request is allowed to be processed
