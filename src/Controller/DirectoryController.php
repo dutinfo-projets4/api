@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\DeleteDirectory;
 use App\Entity\Directory;
 use App\Entity\Element;
 use App\Entity\User;
@@ -103,10 +104,20 @@ class DirectoryController extends Controller {
 			} else if (RequestUtils::checkDELETE($request, array('id'))) {
 				$response->setStatusCode(Response::HTTP_NOT_FOUND);
 
+				/** @var Directory $group */
 				$group = $doctrine->getRepository(Directory::class)->findOneBy(['id' => $request->get('id')]);
 
 				if ($group != null) {
-					if ($group->getUser() == $token->getUser()) {
+					if ($group->getUser() == $token->getUser() && $group->getParentGroup() != null && $group->getParentGroup() != -1) {
+
+						$deletedGroup = new DeleteDirectory();
+						$deletedGroup->setUser($group->getUser());
+						$deletedGroup->setDirectory($group->getID());
+						$deletedGroup->setUpdateTS(new \DateTime());
+
+						$this->getDoctrine()->getManager()->persist($deletedGroup);
+						$this->getDoctrine()->getManager()->flush();
+
 						$this->getDoctrine()->getManager()->remove($group);
 						$this->getDoctrine()->getManager()->flush();
 

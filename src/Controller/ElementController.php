@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\DeleteElement;
 use App\Entity\Directory;
 use App\Entity\Element;
 use App\Entity\Token;
@@ -88,10 +89,20 @@ class ElementController extends Controller
 						'id' => $request->query->get('id'),
 						'user' => $token->getUser(),
 					]))) {
+						/** @var Element $element */
 						$element = $this->getDoctrine()->getRepository(Element::class)->findOneBy([
 							'id' => $request->query->get('id'),
 							'user' => $token->getUser(),
 						]);
+
+						$deletedElement = new DeleteElement();
+						$deletedElement->setUser($element->getUser());
+						$deletedElement->setElement($element->getID());
+						$deletedElement->setUpdateTS(new \DateTime());
+
+						$this->getDoctrine()->getManager()->persist($deletedElement);
+						$this->getDoctrine()->getManager()->flush();
+
 						$this->getDoctrine()->getManager()->remove($element);
 						$this->getDoctrine()->getManager()->flush();
 

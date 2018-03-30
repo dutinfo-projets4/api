@@ -44,6 +44,10 @@ class UserController extends Controller {
 				$doctrine->getManager()->persist($token);
 				$doctrine->getManager()->flush();
 
+				$directory = new Directory($user, null, $request);
+				$doctrine->getManager()->persist($directory);
+				$doctrine->getManager()->flush();
+
 				$response->setStatusCode(Response::HTTP_CREATED);
 				$response->setData([
 					"id" => $user->getId(),
