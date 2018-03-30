@@ -79,9 +79,6 @@ RSA;
 			// Generate the data
 			$data = json_encode(array_merge($request->request->all(), $request->query->all()));
 
-			var_dump($data);
-			var_dump($signature);
-
 			$verif = 0;
 			try {
 				$verif = openssl_verify($data, base64_decode($signature), $pubkey);

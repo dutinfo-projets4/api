@@ -29,9 +29,6 @@ class UpdateController extends Controller
 
 		if ($token != null) {
 
-				$token->setLastUpdateTS(new \DateTime());
-				$em->flush();
-
 				$user = $token->getUser();
 
 				$group = $this->getDoctrine()->getRepository(Directory::class)->findBy([
@@ -64,6 +61,10 @@ class UpdateController extends Controller
 					"groups" => $groupArray,
 					"elements" => $elementArray,
 				]);
+
+				$token->setLastUpdateTS(new \DateTime());
+				$em->flush();
+
 		} else {
 			$response->setStatusCode(Response::HTTP_FORBIDDEN);
 		}

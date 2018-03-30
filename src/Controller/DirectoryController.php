@@ -28,24 +28,24 @@ class DirectoryController extends Controller {
 		$token = LoginUtils::getToken($doctrine->getManager(), $request);
 
 		if ($token != null) {
-			if (RequestUtils::checkPOST($request, array('content'))) {
+			if (RequestUtils::checkPOST($request, array('parent_grp', 'content'))) {
+				$parent = $doctrine->getRepository(Directory::class)->find($request->get('parent_grp'));
 
-				$parent = null;
+				if ($parent != null) {
+					$user = $token->getUser();
 
-				if ($request->get('parent_grp'))
-					$parent = $doctrine->getRepository(Directory::class)->find($request->get('parent_grp'));
+					$group = new Directory($user, $parent != null ? $parent : null, $request);
 
-				$user = $token->getUser();
+					$this->getDoctrine()->getManager()->persist($group);
+					$this->getDoctrine()->getManager()->flush();
 
-				$group = new Directory($user, $parent != null ? $parent : null, $request);
-
-				$this->getDoctrine()->getManager()->persist($group);
-				$this->getDoctrine()->getManager()->flush();
-
-				$response->setStatusCode(Response::HTTP_CREATED);
-				$response->setData([
-					'id' => $group->getID(),
-				]);
+					$response->setStatusCode(Response::HTTP_CREATED);
+					$response->setData([
+						'id' => $group->getID(),
+					]);
+				} else {
+					$response->setStatusCode(Response::HTTP_NOT_FOUND);
+				}
 
 			} else if (RequestUtils::checkPUT($request, array('id', 'content'))) {
 				$response->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -54,10 +54,17 @@ class DirectoryController extends Controller {
 				$content = $request->get('content');
 				$parent = $request->get('parent_grp');
 
-				$group = $doctrine->getRepository(Directory::class)->findOneBy([
-					'user' => $token->getUser(),
-					'id' => $id,
-				]);
+				if ($id == -1){
+					$group = $doctrine->getRepository(Directory::class)->findOneBy([
+						'user' => $token->getUser(),
+						'id'   => null
+					]);
+				} else {
+					$group = $doctrine->getRepository(Directory::class)->findOneBy([
+						'user' => $token->getUser(),
+						'id' => $id,
+					]);
+				}
 
 				if ($group != null) {
 
@@ -80,11 +87,12 @@ class DirectoryController extends Controller {
 					$this->getDoctrine()->getManager()->flush();
 
 					$response->setStatusCode(Response::HTTP_OK);
+				} else {
+					$response->setStatusCode(Response::HTTP_NOT_FOUND);
 				}
 
 
 			} else if (RequestUtils::checkDELETE($request, array('id'))) {
-				var_dump("Toto");
 				$response->setStatusCode(Response::HTTP_NOT_FOUND);
 
 				$group = $doctrine->getRepository(Directory::class)->findOneBy(['id' => $request->get('id')]);

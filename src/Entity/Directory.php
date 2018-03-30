@@ -169,7 +169,7 @@ class Directory {
 		$parent = $this->parent == null ? -1 : $this->parent->getID();
 		return array(
 			"id" => $this->getID(),
-			"parent" => $parent,
+			"parent_grp" => $parent,
 			"content" => $this->content
 		);
 	}
