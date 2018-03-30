@@ -52,6 +52,7 @@ class ElementController extends Controller
 			} else if (RequestUtils::checkPUT($request, array('id', 'content'))) {
 
 				$response->setStatusCode(Response::HTTP_NOT_FOUND);
+				/** @var Element $elt */
 				$elt = $doctrine->getRepository(Element::class)->findOneBy([
 					'id' => $request->get('id'),
 					'user' => $token->getUser()
@@ -66,6 +67,8 @@ class ElementController extends Controller
 					if ($parent != null) {
 						$elt->setGroup($parent);
 					}
+
+					$elt->setLastUpdateTS(new \DateTime());
 
 					$this->getDoctrine()->getManager()->persist($elt);
 					$this->getDoctrine()->getManager()->flush();

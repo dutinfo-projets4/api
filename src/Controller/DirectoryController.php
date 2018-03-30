@@ -54,6 +54,8 @@ class DirectoryController extends Controller {
 				$content = $request->get('content');
 				$parent = $request->get('parent_grp');
 
+				$group = null;
+
 				if ($id == -1){
 					$group = $doctrine->getRepository(Directory::class)->findOneBy([
 						'user' => $token->getUser(),
@@ -80,11 +82,17 @@ class DirectoryController extends Controller {
 
 					}
 
+					$group->setLastUpdateTS(new \DateTime());
+
 					$group->setContent($request->get('content'));
 					$group->setUser($token->getUser());
 
 					$this->getDoctrine()->getManager()->persist($group);
 					$this->getDoctrine()->getManager()->flush();
+
+					$response->setData([
+						'id' => $group->getID()
+					]);
 
 					$response->setStatusCode(Response::HTTP_OK);
 				} else {
